@@ -75,7 +75,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                   const SizedBox(height: 16),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 32),
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
                     child: Text(
                       _items[index].description,
                       textAlign: TextAlign.center,
@@ -98,8 +98,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               children: List.generate(
                 _items.length,
                 (index) => AnimatedContainer(
-                  duration: Duration(microseconds: 300),
-                  margin: EdgeInsets.symmetric(horizontal: 4),
+                  duration: const Duration(microseconds: 300),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
                   height: 8,
                   width: _currentPage == index ? 24 : 8,
                   decoration: BoxDecoration(
@@ -133,7 +133,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   onPressed: () {
                     if (_currentPage < _items.length - 1) {
                       _pageController.nextPage(
-                          duration: Duration(microseconds: 300),
+                          duration: const Duration(microseconds: 300),
                           curve: Curves.easeOut);
                     } else {
                       _handleGetStarted();

@@ -16,11 +16,13 @@ class SplashScreen extends StatelessWidget {
     Future.delayed(const Duration(milliseconds: 2500), () {
       if (authController.isFirstTime) {
         Get.off(() => const OnboardingScreen());
-      } else if (authController.isLoggedIn) {
-        Get.off(() => const MainScreen());
-      } else {
-        Get.off(() => SigninScreen());
       }
+      Get.off(() => const OnboardingScreen());
+      // else if (authController.isLoggedIn) {
+      //   Get.off(() => const MainScreen());
+      // } else {
+      //   Get.off(() => SigninScreen());
+      // }
     });
 
     return Scaffold(

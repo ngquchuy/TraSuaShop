@@ -5,6 +5,7 @@ import 'package:milktea_shop/controllers/theme_controller.dart';
 import 'package:milktea_shop/view/account_screen.dart';
 import 'package:milktea_shop/view/home_screen.dart';
 import 'package:milktea_shop/view/shopping_screen.dart';
+import 'package:milktea_shop/view/widgets/custom_bottom_navbar.dart';
 import 'package:milktea_shop/view/wish_list_screen.dart';
 
 class MainScreen extends StatelessWidget {
@@ -13,7 +14,7 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final NavigationController navigationController =
-        Get.put(NavigationController());
+        Get.find<NavigationController>();
     return GetBuilder<ThemeController>(
         builder: (themeController) => Scaffold(
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -22,7 +23,7 @@ class MainScreen extends StatelessWidget {
                 child: Obx(() => IndexedStack(
                       key: ValueKey(navigationController.currentIndex.value),
                       index: navigationController.currentIndex.value,
-                      children: [
+                      children: const [
                         HomeScreen(),
                         ShoppingScreen(),
                         WishListScreen(),
@@ -30,6 +31,7 @@ class MainScreen extends StatelessWidget {
                       ],
                     )),
               ),
+              bottomNavigationBar: const CustomBottomNavbar(),
             ));
   }
 }

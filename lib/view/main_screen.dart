@@ -26,7 +26,7 @@ class MainScreen extends StatelessWidget {
                       children: const [
                         HomeScreen(),
                         ShoppingScreen(),
-                        WishListScreen(),
+                        WishlistScreen(),
                         AccountScreen(),
                       ],
                     )),

@@ -1,4 +1,4 @@
-import 'dart:isolate';
+import 'package:milktea_shop/models/item_option.dart';
 
 class Product {
   final String name;
@@ -8,19 +8,26 @@ class Product {
   final String imageUrl;
   final bool isFavorite;
   final String descriptions;
+  final int soldCount;
+  final double rating;
+  final List<OptionGroup> optionGroups;
 
-  const Product(
-      {required this.category,
-      required this.price,
-      this.oldPrice,
-      required this.imageUrl,
-      this.isFavorite = false,
-      required this.descriptions,
-      required this.name});
+  const Product({
+    required this.category,
+    required this.price,
+    this.oldPrice,
+    required this.imageUrl,
+    this.isFavorite = false,
+    required this.descriptions,
+    required this.name,
+    this.soldCount = 0,
+    this.rating = 0.0,
+    this.optionGroups = const [],
+  });
 }
 
 final List<Product> products = [
-  const Product(
+  Product(
     name: 'Trà Sữa Trân Châu Đường Đen',
     category: 'Trà Sữa',
     price: 45000,
@@ -28,8 +35,30 @@ final List<Product> products = [
     imageUrl: 'assets/images/bubble-tea-png-graphic-clipart.png',
     isFavorite: true,
     descriptions: 'Trà sữa béo ngậy, trân châu dai mềm, đường đen thơm lừng.',
+    soldCount: 1540,
+    rating: 4.8,
+    optionGroups: [
+      OptionGroup(
+        title: 'Chọn Size',
+        isSingleChoice: true,
+        isRequired: true,
+        options: [
+          ItemOption(name: 'Size M', price: 0, isSelected: true),
+          ItemOption(name: 'Size L', price: 5000, isSelected: false),
+        ],
+      ),
+      OptionGroup(
+        title: 'Chọn Topping',
+        isSingleChoice: false, // Checkbox (Chọn nhiều)
+        isRequired: false,
+        options: [
+          ItemOption(name: 'Trân châu trắng', price: 10000, isSelected: false),
+          ItemOption(name: 'Thạch phô mai', price: 12000, isSelected: false),
+        ],
+      ),
+    ],
   ),
-  const Product(
+  Product(
     name: 'Hồng Trà Kem Cheese',
     category: 'Hồng Trà',
     price: 40000,
@@ -37,8 +66,30 @@ final List<Product> products = [
     imageUrl: 'assets/images/bubble-tea-png-graphic-clipart.png',
     isFavorite: false,
     descriptions: 'Hồng trà đậm vị kết hợp lớp kem cheese mặn mặn béo béo.',
+    soldCount: 1540,
+    rating: 4.8,
+    optionGroups: [
+      OptionGroup(
+        title: 'Chọn Size',
+        isSingleChoice: true,
+        isRequired: true,
+        options: [
+          ItemOption(name: 'Size M', price: 0, isSelected: true),
+          ItemOption(name: 'Size L', price: 5000, isSelected: false),
+        ],
+      ),
+      OptionGroup(
+        title: 'Chọn Topping',
+        isSingleChoice: false, // Checkbox (Chọn nhiều)
+        isRequired: false,
+        options: [
+          ItemOption(name: 'Trân châu trắng', price: 10000, isSelected: false),
+          ItemOption(name: 'Thạch phô mai', price: 12000, isSelected: false),
+        ],
+      ),
+    ],
   ),
-  const Product(
+  Product(
     name: 'Trà Đào Cam Sả',
     category: 'Trà Trái Cây',
     price: 35000,
@@ -46,8 +97,30 @@ final List<Product> products = [
     imageUrl: 'assets/images/bubble-tea-png-graphic-clipart.png',
     isFavorite: true,
     descriptions: 'Hương vị đào tươi mát, cam sả thanh lọc cơ thể.',
+    soldCount: 1540,
+    rating: 4.8,
+    optionGroups: [
+      OptionGroup(
+        title: 'Chọn Size',
+        isSingleChoice: true,
+        isRequired: true,
+        options: [
+          ItemOption(name: 'Size M', price: 0, isSelected: true),
+          ItemOption(name: 'Size L', price: 5000, isSelected: false),
+        ],
+      ),
+      OptionGroup(
+        title: 'Chọn Topping',
+        isSingleChoice: false, // Checkbox (Chọn nhiều)
+        isRequired: false,
+        options: [
+          ItemOption(name: 'Trân châu trắng', price: 10000, isSelected: false),
+          ItemOption(name: 'Thạch phô mai', price: 12000, isSelected: false),
+        ],
+      ),
+    ],
   ),
-  const Product(
+  Product(
     name: 'Trà Sữa Khoai Môn',
     category: 'Trà Sữa',
     price: 48000,
@@ -55,8 +128,30 @@ final List<Product> products = [
     imageUrl: 'assets/images/bubble-tea-png-graphic-clipart.png',
     isFavorite: false,
     descriptions: 'Trà sữa vị khoai môn tự nhiên, bùi và thơm.',
+    soldCount: 1540,
+    rating: 4.8,
+    optionGroups: [
+      OptionGroup(
+        title: 'Chọn Size',
+        isSingleChoice: true,
+        isRequired: true,
+        options: [
+          ItemOption(name: 'Size M', price: 0, isSelected: true),
+          ItemOption(name: 'Size L', price: 5000, isSelected: false),
+        ],
+      ),
+      OptionGroup(
+        title: 'Chọn Topping',
+        isSingleChoice: false, // Checkbox (Chọn nhiều)
+        isRequired: false,
+        options: [
+          ItemOption(name: 'Trân châu trắng', price: 10000, isSelected: false),
+          ItemOption(name: 'Thạch phô mai', price: 12000, isSelected: false),
+        ],
+      ),
+    ],
   ),
-  const Product(
+  Product(
     name: 'Hồng Trà Chanh Leo',
     category: 'Hồng Trà',
     price: 38000,
@@ -64,8 +159,30 @@ final List<Product> products = [
     imageUrl: 'assets/images/bubble-tea-png-graphic-clipart.png',
     isFavorite: false,
     descriptions: 'Vị chua ngọt hài hòa của chanh leo và hồng trà.',
+    soldCount: 1540,
+    rating: 4.8,
+    optionGroups: [
+      OptionGroup(
+        title: 'Chọn Size',
+        isSingleChoice: true,
+        isRequired: true,
+        options: [
+          ItemOption(name: 'Size M', price: 0, isSelected: true),
+          ItemOption(name: 'Size L', price: 5000, isSelected: false),
+        ],
+      ),
+      OptionGroup(
+        title: 'Chọn Topping',
+        isSingleChoice: false, // Checkbox (Chọn nhiều)
+        isRequired: false,
+        options: [
+          ItemOption(name: 'Trân châu trắng', price: 10000, isSelected: false),
+          ItemOption(name: 'Thạch phô mai', price: 12000, isSelected: false),
+        ],
+      ),
+    ],
   ),
-  const Product(
+  Product(
     name: 'Trà Vải Thiều',
     category: 'Trà Trái Cây',
     price: 39000,
@@ -73,5 +190,27 @@ final List<Product> products = [
     imageUrl: 'assets/images/bubble-tea-png-graphic-clipart.png',
     isFavorite: true,
     descriptions: 'Những múi vải tươi mọng kết hợp trà xanh thanh mát.',
+    soldCount: 1540,
+    rating: 4.8,
+    optionGroups: [
+      OptionGroup(
+        title: 'Chọn Size',
+        isSingleChoice: true,
+        isRequired: true,
+        options: [
+          ItemOption(name: 'Size M', price: 0, isSelected: true),
+          ItemOption(name: 'Size L', price: 5000, isSelected: false),
+        ],
+      ),
+      OptionGroup(
+        title: 'Chọn Topping',
+        isSingleChoice: false, // Checkbox (Chọn nhiều)
+        isRequired: false,
+        options: [
+          ItemOption(name: 'Trân châu trắng', price: 10000, isSelected: false),
+          ItemOption(name: 'Thạch phô mai', price: 12000, isSelected: false),
+        ],
+      ),
+    ],
   ),
 ];

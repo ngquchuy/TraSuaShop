@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:milktea_shop/controllers/auth_controller.dart';
-import 'package:milktea_shop/view/main_screen.dart';
-import 'package:milktea_shop/view/signin_screen.dart';
+//import 'package:milktea_shop/view/main_screen.dart';
+//import 'package:milktea_shop/view/signin_screen.dart';
 import 'package:milktea_shop/view/widgets/onboarding_screen.dart';
 
 class SplashScreen extends StatelessWidget {

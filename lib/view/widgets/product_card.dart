@@ -22,7 +22,6 @@ class ProductCard extends StatelessWidget {
     return Container(
       // Giữ nguyên logic tính toán chiều rộng cho Container
       constraints: BoxConstraints(
-        // Chiều rộng tối đa của Card (khoảng 165.3 pixels trong ví dụ lỗi)
         maxWidth: screenWidth * 0.9,
       ),
       decoration: BoxDecoration(
@@ -134,39 +133,29 @@ class ProductCard extends StatelessWidget {
                 SizedBox(
                   height: screenWidth * 0.01,
                 ),
-                // ROW GÂY LỖI ĐÃ ĐƯỢC SỬA
                 Row(
-                  // Dùng MainAxisSize.min để Row chỉ chiếm đủ chỗ cần thiết
-                  // mainAxisSize: MainAxisSize.min, // Nếu cần
                   children: [
-                    // Giá mới (Giá hiện tại)
                     Text(
-                      '\$${product.price.toStringAsFixed(2)}',
+                      '${product.price.toStringAsFixed(0)}đ',
                       style: AppTextstyles.withColor(
                           AppTextstyles.withWeight(
                               AppTextstyles.bodyLarge, FontWeight.bold),
                           Theme.of(context).textTheme.bodyLarge!.color!),
                     ),
-
-                    // Khoảng cách và Giá cũ (Chỉ hiển thị nếu có oldPrice)
                     if (product.oldPrice != null &&
                         product.oldPrice! > product.price) ...[
                       SizedBox(
                         width: screenWidth * 0.01,
                       ),
-
-                      // SỬ DỤNG FLEXIBLE ĐỂ GIÁ CŨ TỰ ĐỘNG CO LẠI
                       Flexible(
                         child: Text(
-                          // ĐÃ SỬA: Dùng product.oldPrice
-                          '\$${product.oldPrice!.toStringAsFixed(2)}',
+                          '${product.oldPrice!.toStringAsFixed(0)}đ',
                           style: AppTextstyles.withColor(
                             AppTextstyles.bodySmall,
                             isDark ? Colors.grey[400]! : Colors.grey[600]!,
                           ).copyWith(
                             decoration: TextDecoration.lineThrough,
                           ),
-                          // Đảm bảo văn bản sẽ bị cắt/ẩn đi nếu không đủ chỗ
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),

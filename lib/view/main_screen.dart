@@ -7,6 +7,7 @@ import 'package:milktea_shop/view/home_screen.dart';
 import 'package:milktea_shop/view/shopping_screen.dart';
 import 'package:milktea_shop/view/widgets/custom_bottom_navbar.dart';
 import 'package:milktea_shop/view/wish_list_screen.dart';
+import 'package:milktea_shop/controllers/wish_list_controller.dart';
 
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
@@ -23,11 +24,11 @@ class MainScreen extends StatelessWidget {
                 child: Obx(() => IndexedStack(
                       key: ValueKey(navigationController.currentIndex.value),
                       index: navigationController.currentIndex.value,
-                      children: const [
-                        HomeScreen(),
+                      children: [
+                        const HomeScreen(),
                         ShoppingScreen(),
-                        WishlistScreen(),
-                        AccountScreen(),
+                        WishListScreen(),
+                        const AccountScreen(),
                       ],
                     )),
               ),

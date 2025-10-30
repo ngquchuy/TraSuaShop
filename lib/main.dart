@@ -5,6 +5,10 @@ import 'package:milktea_shop/controllers/auth_controller.dart';
 import 'package:milktea_shop/controllers/navigation_controller.dart';
 import 'package:milktea_shop/controllers/theme_controller.dart';
 import 'package:milktea_shop/view/splash_screen.dart';
+import 'package:milktea_shop/controllers/shopping_controller.dart';
+import 'package:milktea_shop/controllers/notification_controller.dart';
+import 'package:milktea_shop/controllers/wish_list_controller.dart';
+import 'package:milktea_shop/controllers/user_controller.dart';
 
 import 'utils/app_themes.dart';
 
@@ -13,6 +17,10 @@ main() async {
   Get.put(ThemeController());
   Get.put(AuthController());
   Get.put(NavigationController());
+  Get.put(ShoppingController());  
+  Get.put(NotificationController());
+  Get.put(WishListController());
+  Get.put(UserController());
   runApp(const MainApp());
 }
 

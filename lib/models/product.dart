@@ -1,6 +1,7 @@
 import 'package:milktea_shop/models/item_option.dart';
 
 class Product {
+  final int id;
   final String name;
   final String category;
   final double price;
@@ -13,6 +14,7 @@ class Product {
   final List<OptionGroup> optionGroups;
 
   const Product({
+    required this.id,
     required this.category,
     required this.price,
     this.oldPrice,
@@ -28,6 +30,7 @@ class Product {
 
 final List<Product> products = [
   Product(
+    id: 1,
     name: 'Trà Sữa Trân Châu Đường Đen',
     category: 'Trà Sữa',
     price: 45000,
@@ -59,6 +62,7 @@ final List<Product> products = [
     ],
   ),
   Product(
+    id: 2,
     name: 'Hồng Trà Kem Cheese',
     category: 'Hồng Trà',
     price: 40000,
@@ -90,6 +94,7 @@ final List<Product> products = [
     ],
   ),
   Product(
+    id: 3,
     name: 'Trà Đào Cam Sả',
     category: 'Trà Trái Cây',
     price: 35000,
@@ -121,6 +126,7 @@ final List<Product> products = [
     ],
   ),
   Product(
+    id: 4,
     name: 'Trà Sữa Khoai Môn',
     category: 'Trà Sữa',
     price: 48000,
@@ -152,6 +158,7 @@ final List<Product> products = [
     ],
   ),
   Product(
+    id: 5,
     name: 'Hồng Trà Chanh Leo',
     category: 'Hồng Trà',
     price: 38000,
@@ -183,6 +190,7 @@ final List<Product> products = [
     ],
   ),
   Product(
+    id: 6,
     name: 'Trà Vải Thiều',
     category: 'Trà Trái Cây',
     price: 39000,

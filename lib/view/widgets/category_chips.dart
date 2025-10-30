@@ -10,7 +10,7 @@ class CategoryChips extends StatefulWidget {
 
 class _CategoryChipsState extends State<CategoryChips> {
   int selectedIndex = 0;
-  final categories = ['ALL', 'Trà sữa', 'Trà', 'Hồng trà'];
+  final categories = ['ALL', 'Trà sữa', 'Trà trái cây', 'Hồng trà'];
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;

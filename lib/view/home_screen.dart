@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:milktea_shop/controllers/theme_controller.dart';
+import 'package:milktea_shop/view/all_product_screen.dart';
 import 'package:milktea_shop/view/widgets/category_chips.dart';
 import 'package:milktea_shop/view/widgets/custom_searchbar.dart';
 import 'package:milktea_shop/view/widgets/product_grid.dart';
@@ -95,7 +96,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () => Get.to(() => const AllProductScreen()),
                   child: Text(
                     'Hiển thị tất cả',
                     style: TextStyle(

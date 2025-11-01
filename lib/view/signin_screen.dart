@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:milktea_shop/controllers/auth_controller.dart';
@@ -77,7 +79,7 @@ class SigninScreen extends StatelessWidget {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () => Get.to(()=> ForgotPasswordScreen()),
+                  onPressed: () => Get.to(() => ForgotPasswordScreen()),
                   child: Text(
                     'Quên mật khẩu?',
                     style: AppTextstyles.withColor(
@@ -129,8 +131,60 @@ class SigninScreen extends StatelessWidget {
                     ),
                   ),
                 ],
-              )
-
+              ),
+              const Divider(
+                thickness: 1, // Độ dày của đường kẻ
+                endIndent: 10, // Khoảng cách tới chữ
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Đăng nhập bằng phương thức khác',
+                    textAlign: TextAlign.center,
+                    style: AppTextstyles.withColor(
+                      AppTextstyles.bodySmall,
+                      isDark ? Colors.grey[400]! : Colors.grey[600]!,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  await FirebaseAuth.instance.signInAnonymously();
+                  Get.offAll(() => const MainScreen());
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey.shade200,
+                  // Màu chữ: Màu tối
+                  foregroundColor: Colors.black87,
+                  // Độ cao (Elevation)
+                  elevation: 0,
+                  // Hình dạng: Viền bo tròn
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    // Thêm viền nếu cần
+                    side: BorderSide(color: Colors.grey.shade400, width: 1),
+                  ),
+                  // Kích thước tối thiểu để nút luôn rộng
+                  minimumSize: const Size(double.infinity, 50),
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  textStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                child: Text(
+                  'Đăng nhập như khách',
+                  style: AppTextstyles.withColor(
+                    AppTextstyles.buttonMedium,
+                    Colors.black87,
+                  ),
+                ),
+              ),
             ],
           ),
         ),

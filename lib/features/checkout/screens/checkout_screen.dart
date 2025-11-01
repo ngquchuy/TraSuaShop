@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:milktea_shop/controllers/shopping_controller.dart';
+import 'package:milktea_shop/features/checkout/widgets/address_card.dart';
+import 'package:milktea_shop/features/checkout/widgets/checkout_bottom_bar.dart';
+import 'package:milktea_shop/features/checkout/widgets/order_summary_card.dart';
+import 'package:milktea_shop/features/checkout/widgets/payment_method_card.dart';
+import 'package:milktea_shop/features/order%20confirmation/screens/order_confirmation_screen.dart';
 import 'package:milktea_shop/utils/app_textstyles.dart';
 
 class CheckoutScreen extends StatelessWidget {
@@ -8,6 +14,8 @@ class CheckoutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ShoppingController shoppingController =
+        Get.find<ShoppingController>();
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -31,8 +39,37 @@ class CheckoutScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSectionTitle(context, 'Địa chỉ nhận hàng'),
+            const SizedBox(
+              height: 16,
+            ),
+            const AddressCard(),
+            const SizedBox(
+              height: 24,
+            ),
+            _buildSectionTitle(context, 'Phương thức thanh toán'),
+            const SizedBox(
+              height: 16,
+            ),
+            const PaymentMethodCard(),
+            const SizedBox(
+              height: 16,
+            ),
+            _buildSectionTitle(context, 'Chi tiết thanh toán'),
+            const OrderSummaryCard(),
           ],
         ), // Column
+      ),
+      bottomNavigationBar: CheckoutBottomBar(
+        totalAmount: 45000,
+        onPlaceOrder: () {
+          final orderNumber =
+              'ORDS${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+
+          Get.to(() => OrderConfirmationScreen(
+                orderNumber: orderNumber,
+                totalAmount: 45000,
+              ));
+        },
       ),
     );
   }

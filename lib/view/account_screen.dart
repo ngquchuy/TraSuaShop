@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:milktea_shop/controllers/theme_controller.dart';
 import 'package:milktea_shop/controllers/user_controller.dart';
+import 'package:milktea_shop/features/help%20center/views/screen/help_center_screen.dart';
+import 'package:milktea_shop/features/shipping%20address/shipping_address_screen.dart';
+import 'package:milktea_shop/view/cart_screen.dart';
 import 'package:milktea_shop/view/edit_profile_screen.dart';
-import 'package:milktea_shop/view/shopping_screen.dart';
 import 'package:milktea_shop/view/wish_list_screen.dart';
 
 class AccountScreen extends StatelessWidget {
@@ -16,15 +18,20 @@ class AccountScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Trang cá nhân'),
+        title: const Text('Tài khoản của tôi'),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(0),
         child: Column(
           children: [
             Obx(() => Column(
                   children: [
+                    const CircleAvatar(
+                      radius: 50,
+                      backgroundImage: AssetImage(
+                          'assets/images/avatar-with-black-hair-and-hoodie.png'),
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       userController.userName.value,
@@ -49,10 +56,10 @@ class AccountScreen extends StatelessWidget {
                 children: [
                   _buildAccountItem(
                     context,
-                    icon: Icons.shopping_bag_outlined,
+                    icon: Icons.shopping_cart_outlined,
                     title: 'Đơn hàng của tôi',
                     subtitle: 'Xem trạng thái đơn hàng và chi tiết',
-                    onTap: () => Get.to(() => ShoppingScreen()),
+                    onTap: () => Get.to(() => CartScreen()),
                   ),
                   const Divider(height: 1),
                   _buildAccountItem(
@@ -75,12 +82,22 @@ class AccountScreen extends StatelessWidget {
                   const Divider(height: 1),
                   _buildAccountItem(
                     context,
+                    icon: Icons.location_on,
+                    title: 'Địa chỉ',
+                    subtitle: 'Địa chỉ nhận hàng của bạn',
+                    onTap: () => Get.to(() => ShippingAdressScreen()),
+                  ),
+                  const Divider(height: 1),
+                  _buildAccountItem(
+                    context,
                     icon: Icons.settings,
-                    title: 'Cài đặt tài khoản',
+                    title: 'Chỉnh sửa hồ sơ',
                     subtitle: 'Chỉnh sửa thông tin cá nhân',
                     onTap: () => Get.to(() => const EditProfileScreen()),
                   ),
-                  const Divider(height: 1),
+                  const Divider(
+                    thickness: 10,
+                  ),
                   // 🌗 Dark / Light mode toggle
                   GetBuilder<ThemeController>(
                     builder: (_) => SwitchListTile(
@@ -89,6 +106,22 @@ class AccountScreen extends StatelessWidget {
                       secondary: const Icon(Icons.dark_mode),
                       onChanged: (val) => themeController.toggleTheme(),
                     ),
+                  ),
+                  const Divider(height: 1),
+                  _buildAccountItem(
+                    context,
+                    icon: Icons.support_agent_outlined,
+                    title: 'Hỗ trợ',
+                    subtitle: 'Liên hệ với chúng tôi',
+                    onTap: () => Get.to(() => const HelpCenterScreen()),
+                  ),
+                  const Divider(height: 1),
+                  _buildAccountItem(
+                    context,
+                    icon: Icons.article_outlined,
+                    title: 'Điều khoản & Chính sách',
+                    subtitle: 'Liên hệ với chúng tôi',
+                    onTap: () => Get.to(() => const EditProfileScreen()),
                   ),
                   const Divider(height: 1),
                   _buildAccountItem(

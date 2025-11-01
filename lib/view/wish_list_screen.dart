@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:milktea_shop/controllers/wish_list_controller.dart';
 import 'package:milktea_shop/controllers/shopping_controller.dart';
 import 'package:milktea_shop/models/product.dart';
-import 'package:milktea_shop/view/shopping_screen.dart';
+import 'package:milktea_shop/view/cart_screen.dart';
 
 class WishListScreen extends StatelessWidget {
   const WishListScreen({super.key});
@@ -24,7 +24,7 @@ class WishListScreen extends StatelessWidget {
             icon: const Icon(Icons.shopping_cart_outlined),
             onPressed: () {
               // Nếu bạn có ShoppingScreen, có thể mở bằng:
-              Get.to(() => ShoppingScreen());
+              Get.to(() => CartScreen());
             },
           ),
           // 🗑️ Xóa toàn bộ danh sách yêu thích

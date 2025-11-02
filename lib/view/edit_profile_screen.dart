@@ -45,7 +45,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+<<<<<<< HEAD
         title: const Text('Cài đặt tài khoản'),
+=======
+        title: const Text('Chỉnh sửa hồ sơ'),
+>>>>>>> 73ec81ded91f4a8287c8bc150df3481f30676899
         centerTitle: true,
       ),
       body: SingleChildScrollView(

@@ -28,7 +28,11 @@ class MainScreen extends StatelessWidget {
                         const HomeScreen(),
                         ShoppingScreen(),
                         WishListScreen(),
+<<<<<<< HEAD
                         const AccountScreen(),
+=======
+                        AccountScreen(),
+>>>>>>> 73ec81ded91f4a8287c8bc150df3481f30676899
                       ],
                     )),
               ),

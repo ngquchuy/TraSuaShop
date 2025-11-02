@@ -1,67 +1,19 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
 import 'package:get/get.dart';
 import 'package:milktea_shop/controllers/shopping_controller.dart';
-=======
-import 'package:milktea_shop/utils/app_textstyles.dart';
-import 'package:milktea_shop/view/widgets/category_chips.dart';
-import 'package:milktea_shop/view/widgets/filter_bottom_sheet.dart';
-import 'package:milktea_shop/view/widgets/product_grid.dart';
->>>>>>> 73ec81ded91f4a8287c8bc150df3481f30676899
+import 'package:milktea_shop/features/checkout/screens/checkout_screen.dart';
 
-class ShoppingScreen extends StatelessWidget {
+class CartScreen extends StatelessWidget {
   final ShoppingController shoppingController = Get.find<ShoppingController>();
 
-  ShoppingScreen({super.key});
+  CartScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-<<<<<<< HEAD
         title: const Text('Giỏ hàng'),
         centerTitle: true,
-=======
-        title: Text(
-          'Mua hàng',
-          style: AppTextstyles.withColor(
-            AppTextstyles.h3,
-            isDark ? Colors.white : Colors.black,
-          ),
-        ),
-        actions: [
-          // search icon
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.search,
-              color: isDark ? Colors.white : Colors.black,
-            ),
-          ),
-
-          // filter icon
-          IconButton(
-            onPressed: () => FilterBottomSheet.show(context),
-            icon: Icon(
-              Icons.filter_list,
-              color: isDark ? Colors.white : Colors.black,
-            ),
-          ),
-        ],
-      ),
-      body: const Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.only(top: 16),
-            child: CategoryChips(),
-          ),
-          Expanded(
-            child: ProductGrid(),
-          )
-        ],
->>>>>>> 73ec81ded91f4a8287c8bc150df3481f30676899
       ),
       body: Obx(() {
         if (shoppingController.shoppingItems.isEmpty) {
@@ -131,14 +83,14 @@ class ShoppingScreen extends StatelessWidget {
                               IconButton(
                                 onPressed: () {
                                   shoppingController.decreaseQuantity(item);
-                                  Get.snackbar(
-                                    'Giỏ hàng',
-                                    'Đã giảm số lượng sản phẩm',
-                                    snackPosition: SnackPosition.TOP,
-                                    backgroundColor:
-                                        Colors.black.withOpacity(0.3),
-                                    colorText: Colors.white,
-                                  );
+                                  // Get.snackbar(
+                                  //   'Giỏ hàng',
+                                  //   'Đã giảm số lượng sản phẩm',
+                                  //   snackPosition: SnackPosition.TOP,
+                                  //   backgroundColor:
+                                  //       Colors.black.withOpacity(0.3),
+                                  //   colorText: Colors.white,
+                                  // );
                                 },
                                 icon: const Icon(Icons.remove_circle_outline),
                               ),
@@ -153,14 +105,14 @@ class ShoppingScreen extends StatelessWidget {
                                 onPressed: () {
                                   shoppingController
                                       .addToShopping(item.product);
-                                  Get.snackbar(
-                                    'Giỏ hàng',
-                                    'Đã tăng số lượng sản phẩm',
-                                    snackPosition: SnackPosition.TOP,
-                                    backgroundColor:
-                                        Colors.black.withOpacity(0.3),
-                                    colorText: Colors.white,
-                                  );
+                                  // Get.snackbar(
+                                  //   'Giỏ hàng',
+                                  //   'Đã tăng số lượng sản phẩm',
+                                  //   snackPosition: SnackPosition.TOP,
+                                  //   backgroundColor:
+                                  //       Colors.black.withOpacity(0.3),
+                                  //   colorText: Colors.white,
+                                  // );
                                 },
                                 icon: const Icon(Icons.add_circle_outline),
                               ),
@@ -210,17 +162,7 @@ class ShoppingScreen extends StatelessWidget {
                         ),
                       )),
                   ElevatedButton.icon(
-                    onPressed: () {
-                      Get.snackbar(
-                        'Thanh toán',
-                        'Chức năng thanh toán đang được phát triển',
-                        snackPosition: SnackPosition.TOP,
-                        backgroundColor: Colors.black.withOpacity(0.2),
-                        borderRadius: 12,
-                        margin: const EdgeInsets.all(12),
-                        colorText: Colors.white,
-                      );
-                    },
+                    onPressed: () => Get.to(() => const CheckoutScreen()),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blueAccent,
                       padding: const EdgeInsets.symmetric(

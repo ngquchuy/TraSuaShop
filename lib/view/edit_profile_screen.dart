@@ -27,29 +27,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     avatarPath = userController.avatarPath.value;
   }
 
-  void _saveProfile() {
-    if (_formKey.currentState!.validate()) {
-      userController.updateUser(
-        nameController.text.trim(),
-        emailController.text.trim(),
-        avatarPath!,
-      );
-      Get.back();
-      Get.snackbar('Thành công', 'Cập nhật thông tin tài khoản thành công 🎉',
-          snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 2));
-    }
-  }
+  //void _saveProfile() {
+  // if (_formKey.currentState!.validate()) {
+  //userController.updateUser(
+  //nameController.text.trim(),
+  //emailController.text.trim(),
+  //avatarPath!,
+  //);
+  //Get.back();
+  //Get.snackbar('Thành công', 'Cập nhật thông tin tài khoản thành công 🎉',
+  // snackPosition: SnackPosition.BOTTOM,
+  // duration: const Duration(seconds: 2));
+  // }
+  //}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-<<<<<<< HEAD
-        title: const Text('Cài đặt tài khoản'),
-=======
         title: const Text('Chỉnh sửa hồ sơ'),
->>>>>>> 73ec81ded91f4a8287c8bc150df3481f30676899
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -114,12 +110,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               // Nút lưu
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton.icon(
-                  icon: const Icon(Icons.save),
-                  label: const Text('Lưu thay đổi'),
-                  onPressed: _saveProfile,
-                ),
+                //child: ElevatedButton.icon(
+                //icon: const Icon(Icons.save),
+                //label: const Text('Lưu thay đổi'),
+                //onPressed: _saveProfile,
               ),
+              // ),
             ],
           ),
         ),

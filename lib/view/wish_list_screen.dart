@@ -1,43 +1,88 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:milktea_shop/controllers/wish_list_controller.dart';
 import 'package:milktea_shop/controllers/shopping_controller.dart';
+import 'package:milktea_shop/controllers/wish_list_controller.dart'; // Import WishListController
 import 'package:milktea_shop/models/product.dart';
-<<<<<<< HEAD
-import 'package:milktea_shop/view/shopping_screen.dart';
-=======
-import 'package:milktea_shop/view/cart_screen.dart';
->>>>>>> 73ec81ded91f4a8287c8bc150df3481f30676899
+import 'package:milktea_shop/view/cart_screen.dart'; // Import CartScreen
+import 'package:milktea_shop/view/product_detail_screen.dart'; // Import ProductDetailScreen
 
 class WishListScreen extends StatelessWidget {
   const WishListScreen({super.key});
 
+  // Hàm xử lý ảnh (Copy từ ProductGrid/CartScreen sang để tái sử dụng)
+  // Tốt nhất là nên tách hàm này ra file utils riêng để dùng chung
+  String fixImageUrl(String url) {
+    if (url.isEmpty) return '';
+    if (url.contains('localhost')) {
+      return url.replaceAll('localhost', '10.0.2.2');
+    }
+    if (!url.startsWith('http')) {
+      if (url.startsWith('/')) {
+        return 'http://10.0.2.2:5001$url';
+      }
+      return 'http://10.0.2.2:5001/$url';
+    }
+    return url;
+  }
+
+  Widget _buildImage(String rawUrl) {
+    final String finalUrl = fixImageUrl(rawUrl);
+
+    if (finalUrl.isEmpty) {
+      return const Icon(Icons.image_not_supported, color: Colors.grey, size: 50);
+    }
+
+    if (finalUrl.startsWith('http')) {
+      return Image.network(
+        finalUrl,
+        width: 60,
+        height: 60,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) =>
+            const Icon(Icons.broken_image, color: Colors.grey, size: 50),
+      );
+    }
+    return Image.asset(finalUrl, width: 60, height: 60, fit: BoxFit.cover);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final WishListController wishListController =
-        Get.find<WishListController>();
-    final ShoppingController shoppingController =
-        Get.find<ShoppingController>();
+    // Khởi tạo/Tìm các Controller
+    final WishListController wishListController = Get.put(WishListController());
+    final ShoppingController shoppingController = Get.find<ShoppingController>();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Danh sách yêu thích ❤️'),
+        centerTitle: true, // Căn giữa tiêu đề cho đẹp
         actions: [
           // 🛒 Icon giỏ hàng
           IconButton(
             icon: const Icon(Icons.shopping_cart_outlined),
             onPressed: () {
-              // Nếu bạn có ShoppingScreen, có thể mở bằng:
-<<<<<<< HEAD
-              Get.to(() => ShoppingScreen());
-=======
               Get.to(() => CartScreen());
->>>>>>> 73ec81ded91f4a8287c8bc150df3481f30676899
             },
           ),
           // 🗑️ Xóa toàn bộ danh sách yêu thích
           IconButton(
-            onPressed: wishListController.clearFavorites,
+            onPressed: () {
+               if(wishListController.favoriteItems.isNotEmpty){
+                  // Hiện dialog xác nhận trước khi xóa hết
+                  Get.defaultDialog(
+                    title: "Xác nhận",
+                    middleText: "Bạn có chắc muốn xóa hết danh sách yêu thích?",
+                    textConfirm: "Xóa",
+                    textCancel: "Hủy",
+                    confirmTextColor: Colors.white,
+                    onConfirm: () {
+                      wishListController.clearFavorites();
+                      Get.back(); // Đóng dialog
+                    }
+                  );
+               } else {
+                 Get.snackbar("Thông báo", "Danh sách đang trống", snackPosition: SnackPosition.BOTTOM);
+               }
+            },
             icon: const Icon(Icons.delete_forever),
             tooltip: 'Xóa tất cả',
           ),
@@ -46,10 +91,17 @@ class WishListScreen extends StatelessWidget {
       body: Obx(() {
         // Nếu danh sách rỗng
         if (wishListController.favoriteItems.isEmpty) {
-          return const Center(
-            child: Text(
-              'Chưa có sản phẩm yêu thích nào 😢',
-              style: TextStyle(fontSize: 16),
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.favorite_border, size: 80, color: Colors.grey[300]),
+                const SizedBox(height: 16),
+                const Text(
+                  'Chưa có sản phẩm yêu thích nào 😢',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+              ],
             ),
           );
         }
@@ -62,49 +114,77 @@ class WishListScreen extends StatelessWidget {
             return Card(
               margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
-              elevation: 3,
-              child: ListTile(
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                title: Text(
-                  product.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+              elevation: 2,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                   // Chuyển sang màn hình chi tiết khi bấm vào item
+                   Get.to(() => ProductDetailScreen(product: product));
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                       // Ảnh sản phẩm
+                       ClipRRect(
+                         borderRadius: BorderRadius.circular(8),
+                         child: _buildImage(product.imageUrl),
+                       ),
+                       const SizedBox(width: 12),
+                       
+                       // Thông tin
+                       Expanded(
+                         child: Column(
+                           crossAxisAlignment: CrossAxisAlignment.start,
+                           children: [
+                             Text(
+                               product.name,
+                               style: const TextStyle(
+                                 fontWeight: FontWeight.bold,
+                                 fontSize: 16,
+                               ),
+                               maxLines: 2,
+                               overflow: TextOverflow.ellipsis,
+                             ),
+                             const SizedBox(height: 4),
+                             Text(
+                               '${product.price.toStringAsFixed(0)} đ',
+                               style: TextStyle(
+                                 color: Theme.of(context).primaryColor,
+                                 fontWeight: FontWeight.bold,
+                                 fontSize: 15,
+                               ),
+                             ),
+                           ],
+                         ),
+                       ),
+
+                       // Nút hành động
+                       Row(
+                         mainAxisSize: MainAxisSize.min,
+                         children: [
+                           // 🛒 Nút thêm vào giỏ
+                           IconButton(
+                             icon: const Icon(Icons.add_shopping_cart, color: Colors.blue),
+                             tooltip: 'Thêm vào giỏ hàng',
+                             onPressed: () {
+                               shoppingController.addToShopping(product);
+                               // Không cần snackbar ở đây nữa vì Controller đã có rồi
+                             },
+                           ),
+                           // ❌ Nút xóa khỏi yêu thích
+                           IconButton(
+                             icon: const Icon(Icons.delete_outline, color: Colors.red),
+                             tooltip: 'Xóa khỏi yêu thích',
+                             onPressed: () =>
+                                 wishListController.toggleFavorite(product),
+                           ),
+                         ],
+                       ),
+                    ],
                   ),
-                ),
-                subtitle: Text(
-                  '${product.price.toStringAsFixed(0)} đ',
-                  style: const TextStyle(
-                    color: Colors.brown,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // 🛒 Nút thêm vào giỏ
-                    IconButton(
-                      icon: const Icon(Icons.add_shopping_cart),
-                      tooltip: 'Thêm vào giỏ hàng',
-                      onPressed: () {
-                        shoppingController.addToShopping(product);
-                        Get.snackbar('Giỏ hàng',
-                            '${product.name} đã được thêm vào giỏ hàng',
-                            snackPosition: SnackPosition.BOTTOM,
-                            duration: const Duration(seconds: 2));
-                      },
-                    ),
-                    // ❌ Nút xóa khỏi yêu thích
-                    IconButton(
-                      icon: const Icon(Icons.remove_circle_outline),
-                      tooltip: 'Xóa khỏi yêu thích',
-                      onPressed: () =>
-                          wishListController.toggleFavorite(product),
-                    ),
-                  ],
                 ),
               ),
             );

@@ -7,7 +7,6 @@ import 'package:milktea_shop/view/home_screen.dart';
 import 'package:milktea_shop/view/shopping_screen.dart';
 import 'package:milktea_shop/view/widgets/custom_bottom_navbar.dart';
 import 'package:milktea_shop/view/wish_list_screen.dart';
-import 'package:milktea_shop/controllers/wish_list_controller.dart';
 
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
@@ -28,11 +27,7 @@ class MainScreen extends StatelessWidget {
                         const HomeScreen(),
                         ShoppingScreen(),
                         WishListScreen(),
-<<<<<<< HEAD
-                        const AccountScreen(),
-=======
                         AccountScreen(),
->>>>>>> 73ec81ded91f4a8287c8bc150df3481f30676899
                       ],
                     )),
               ),

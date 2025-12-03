@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-<<<<<<< HEAD
-import 'package:milktea_shop/controllers/shopping_controller.dart';
-import 'package:milktea_shop/controllers/wish_list_controller.dart';
-import 'package:milktea_shop/models/product.dart';
-=======
 import 'package:milktea_shop/models/product.dart';
 import 'package:milktea_shop/utils/app_textstyles.dart';
 import 'package:milktea_shop/controllers/shopping_controller.dart';
 import 'package:milktea_shop/controllers/wish_list_controller.dart';
->>>>>>> 73ec81ded91f4a8287c8bc150df3481f30676899
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -17,96 +11,21 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-<<<<<<< HEAD
-    final shoppingController = Get.find<ShoppingController>();
-    final wishListController = Get.find<WishListController>();
-=======
     // Tìm các Controllers
     final shoppingController = Get.find<ShoppingController>();
     final wishListController = Get.find<WishListController>();
 
     final screenWidth = MediaQuery.of(context).size.width;
     final isDark = Theme.of(context).brightness == Brightness.dark;
->>>>>>> 73ec81ded91f4a8287c8bc150df3481f30676899
 
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Tên sản phẩm
-            Text(
-              product.name,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
+    // Tính toán phần trăm giảm giá để điền vào banner "SALE"
+    String discountText = '';
+    if (product.oldPrice != null && product.oldPrice! > product.price) {
+      double discountPercentage =
+          ((product.oldPrice! - product.price) / product.oldPrice!) * 100;
+      discountText = '-${discountPercentage.toStringAsFixed(0)}%';
+    }
 
-<<<<<<< HEAD
-            const SizedBox(height: 8),
-
-            // Giá sản phẩm
-            Text(
-              '${product.price.toStringAsFixed(0)} đ',
-              style: const TextStyle(
-                color: Colors.brown,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-
-            const Spacer(),
-
-            // Hàng chứa 2 nút: yêu thích + giỏ hàng
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // ❤️ Nút yêu thích
-                Obx(() {
-                  final isFavorite = wishListController.isFavorite(product);
-                  return IconButton(
-                    icon: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: isFavorite ? Colors.red : Colors.grey,
-                    ),
-                    onPressed: () {
-                      wishListController.toggleFavorite(product);
-                      Get.snackbar(
-                        'Yêu thích',
-                        isFavorite
-                            ? 'Đã xóa khỏi danh sách yêu thích'
-                            : 'Đã thêm vào danh sách yêu thích',
-                        snackPosition: SnackPosition.BOTTOM,
-                        duration: const Duration(seconds: 2),
-                      );
-                    },
-                  );
-                }),
-
-                // 🛒 Nút giỏ hàng (chỉ icon)
-                IconButton(
-                  icon: const Icon(Icons.add_shopping_cart, size: 22),
-                  onPressed: () {
-                    shoppingController.addToShopping(product);
-                    Get.snackbar(
-                      'Giỏ hàng',
-                      '${product.name} đã được thêm vào giỏ hàng',
-                      snackPosition: SnackPosition.BOTTOM,
-                      duration: const Duration(seconds: 2),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
-=======
     return Container(
       constraints: BoxConstraints(
         maxWidth: screenWidth * 0.9,
@@ -274,7 +193,6 @@ class ProductCard extends StatelessWidget {
             ),
           ),
         ],
->>>>>>> 73ec81ded91f4a8287c8bc150df3481f30676899
       ),
     );
   }

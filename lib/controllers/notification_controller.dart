@@ -1,24 +1,44 @@
 import 'package:get/get.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class NotificationController extends GetxController {
-  // Danh sách thông báo
-  final RxList<String> notifications = <String>[].obs;
+  final notifications = <String>[].obs;
 
-  // Thêm thông báo mới
-  void addNotification(String message) {
+  final dbRef = FirebaseDatabase.instance.ref('notifications');
+
+  @override
+  void onInit() {
+    super.onInit();
+
+    // Listen realtime
+    dbRef.onValue.listen((event) {
+      final data = event.snapshot.value;
+      if (data == null) {
+        notifications.clear();
+      } else {
+        final list = List<String>.from(data as List);
+        notifications.assignAll(list);
+      }
+    });
+  }
+
+  // add
+  Future<void> addNotification(String message) async {
     notifications.add(message);
+    await dbRef.set(notifications); // update toàn bộ list lên firebase
   }
 
-  // Xóa 1 thông báo
-  void removeNotification(int index) {
+  // remove 1 cái
+  Future<void> removeNotification(int index) async {
     notifications.removeAt(index);
+    await dbRef.set(notifications);
   }
 
-  // Xóa toàn bộ thông báo
-  void clearAll() {
+  // clear hết
+  Future<void> clearAll() async {
     notifications.clear();
+    await dbRef.set([]);
   }
 
-  // Lấy tổng số thông báo chưa đọc
   int get count => notifications.length;
 }

@@ -13,32 +13,26 @@ import 'package:milktea_shop/controllers/shopping_controller.dart';
 import 'package:milktea_shop/controllers/notification_controller.dart';
 import 'package:milktea_shop/controllers/wish_list_controller.dart';
 import 'package:milktea_shop/controllers/user_controller.dart';
-<<<<<<< HEAD
-
-=======
->>>>>>> 73ec81ded91f4a8287c8bc150df3481f30676899
 import 'utils/app_themes.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // phải để trên cùng
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   await GetStorage.init();
+
+  // put controller sau khi firebase init
   Get.put(ThemeController());
   Get.put(AuthController());
   Get.put(NavigationController());
-<<<<<<< HEAD
-  Get.put(ShoppingController());  
-  Get.put(NotificationController());
-  Get.put(WishListController());
-  Get.put(UserController());
-=======
   Get.put(ShoppingController());
   Get.put(NotificationController());
   Get.put(WishListController());
   Get.put(UserController());
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
->>>>>>> 73ec81ded91f4a8287c8bc150df3481f30676899
+
   runApp(const MainApp());
 }
+
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});

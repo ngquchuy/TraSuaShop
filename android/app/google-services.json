@@ -12,7 +12,20 @@
           "package_name": "com.example.milktea_shop"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "663267627843-314bkepsb16ldakk9tc8eoi4e3lrmq4a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.milktea_shop",
+            "certificate_hash": "6cca6089f2941256b86e86a16ac87ae40ee277c7"
+          }
+        },
+        {
+          "client_id": "663267627843-97gqupi945ov0tuskc1rri101fhc3srg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyA1MqB2tgsMBhQBaRCerp2A2tkeN0OYwNI"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "663267627843-97gqupi945ov0tuskc1rri101fhc3srg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "663267627843-6qc84vd6s4hvovi6nq5jeopomt6dbuq0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.milkteaShop"
+              }
+            }
+          ]
         }
       }
     }

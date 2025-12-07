@@ -7,6 +7,46 @@ class ShoppingScreen extends StatelessWidget {
 
   ShoppingScreen({super.key});
 
+  // --- 1. HÀM SỬA LỖI ĐƯỜNG DẪN ẢNH ---
+  String fixImageUrl(String url) {
+    if (url.isEmpty) return '';
+    
+    // Fix lỗi localhost trên máy ảo
+    if (url.contains('localhost')) {
+      return url.replaceAll('localhost', '10.0.2.2');
+    }
+
+    // Fix đường dẫn tương đối (uploads/...)
+    if (!url.startsWith('http')) {
+      if (url.startsWith('/')) {
+        return 'http://10.0.2.2:5001$url';
+      }
+      return 'http://10.0.2.2:5001/$url';
+    }
+    return url;
+  }
+
+  // --- 2. WIDGET HIỂN THỊ ẢNH ---
+  Widget _buildImage(String rawUrl) {
+    final String finalUrl = fixImageUrl(rawUrl);
+
+    if (finalUrl.isEmpty) {
+      return const Icon(Icons.image_not_supported, color: Colors.grey, size: 40);
+    }
+
+    if (finalUrl.startsWith('http')) {
+      return Image.network(
+        finalUrl,
+        width: 60,
+        height: 60,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => 
+            const Icon(Icons.broken_image, color: Colors.grey, size: 40),
+      );
+    }
+    return Image.asset(finalUrl, width: 60, height: 60, fit: BoxFit.cover);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,8 +73,7 @@ class ShoppingScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final item = shoppingController.shoppingItems[index];
                   return Card(
-                    margin:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                     elevation: 2,
@@ -43,15 +82,10 @@ class ShoppingScreen extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          // Ảnh sản phẩm
+                          // --- SỬA LẠI PHẦN ẢNH (Dùng _buildImage) ---
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8),
-                            child: Image.asset(
-                              item.product.imageUrl,
-                              width: 60,
-                              height: 60,
-                              fit: BoxFit.cover,
-                            ),
+                            child: _buildImage(item.product.imageUrl), 
                           ),
                           const SizedBox(width: 10),
 
@@ -76,20 +110,12 @@ class ShoppingScreen extends StatelessWidget {
                             ),
                           ),
 
-                          // Cụm nút hành động
+                          // Cụm nút hành động (Tăng/Giảm/Xóa)
                           Row(
                             children: [
                               IconButton(
                                 onPressed: () {
                                   shoppingController.decreaseQuantity(item);
-                                  Get.snackbar(
-                                    'Giỏ hàng',
-                                    'Đã giảm số lượng sản phẩm',
-                                    snackPosition: SnackPosition.TOP,
-                                    backgroundColor:
-                                        Colors.black.withOpacity(0.3),
-                                    colorText: Colors.white,
-                                  );
                                 },
                                 icon: const Icon(Icons.remove_circle_outline),
                               ),
@@ -102,16 +128,7 @@ class ShoppingScreen extends StatelessWidget {
                               ),
                               IconButton(
                                 onPressed: () {
-                                  shoppingController
-                                      .addToShopping(item.product);
-                                  Get.snackbar(
-                                    'Giỏ hàng',
-                                    'Đã tăng số lượng sản phẩm',
-                                    snackPosition: SnackPosition.TOP,
-                                    backgroundColor:
-                                        Colors.black.withOpacity(0.3),
-                                    colorText: Colors.white,
-                                  );
+                                  shoppingController.addToShopping(item.product);
                                 },
                                 icon: const Icon(Icons.add_circle_outline),
                               ),
@@ -122,13 +139,10 @@ class ShoppingScreen extends StatelessWidget {
                                     'Giỏ hàng',
                                     'Đã xóa sản phẩm khỏi giỏ',
                                     snackPosition: SnackPosition.TOP,
-                                    backgroundColor:
-                                        Colors.black.withOpacity(0.3),
-                                    colorText: Colors.white,
+                                    duration: const Duration(seconds: 1),
                                   );
                                 },
-                                icon: const Icon(Icons.delete,
-                                    color: Colors.redAccent),
+                                icon: const Icon(Icons.delete, color: Colors.redAccent),
                               ),
                             ],
                           ),
@@ -144,36 +158,38 @@ class ShoppingScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                border: Border(
-                  top: BorderSide(color: Colors.blue.shade200, width: 1.5),
-                ),
+                color: Theme.of(context).cardColor, 
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
+                  )
+                ],
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Obx(() => Text(
-                        'Tổng cộng: ${shoppingController.totalPrice.toStringAsFixed(0)} đ',
-                        style: const TextStyle(
+                  Obx(() => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("Tổng cộng:", style: TextStyle(color: Colors.grey)),
+                      Text(
+                        '${shoppingController.totalPrice.toStringAsFixed(0)} đ',
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blueAccent,
+                          color: Theme.of(context).primaryColor,
                         ),
-                      )),
+                      ),
+                    ],
+                  )),
                   ElevatedButton.icon(
                     onPressed: () {
-                      Get.snackbar(
-                        'Thanh toán',
-                        'Chức năng thanh toán đang được phát triển',
-                        snackPosition: SnackPosition.TOP,
-                        backgroundColor: Colors.black.withOpacity(0.2),
-                        borderRadius: 12,
-                        margin: const EdgeInsets.all(12),
-                        colorText: Colors.white,
-                      );
+                       Get.snackbar("Thông báo", "Chức năng thanh toán đang phát triển");
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
+                      backgroundColor: Theme.of(context).primaryColor,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 12),
                       shape: RoundedRectangleBorder(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:milktea_shop/utils/app_textstyles.dart';
+import 'package:milktea_shop/utils/number_formatter.dart';
 
 class CheckoutBottomBar extends StatelessWidget {
   final double totalAmount;
@@ -36,7 +37,7 @@ class CheckoutBottomBar extends StatelessWidget {
               ),
             ),
             child: Text(
-              'Đặt hàng ( ${totalAmount.toStringAsFixed(0)}đ)',
+              'Đặt hàng ( ${NumberFormatter.formatPrice(totalAmount)})',
               style: AppTextstyles.withColor(
                   AppTextstyles.buttonMedium, Colors.white),
             )),

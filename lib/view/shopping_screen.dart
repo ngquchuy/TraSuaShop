@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:milktea_shop/controllers/shopping_controller.dart';
+import 'package:milktea_shop/utils/number_formatter.dart';
+import 'package:milktea_shop/view/checkout_screen.dart';
 
 class ShoppingScreen extends StatelessWidget {
   final ShoppingController shoppingController = Get.find<ShoppingController>();
@@ -10,7 +12,7 @@ class ShoppingScreen extends StatelessWidget {
   // --- 1. HÀM SỬA LỖI ĐƯỜNG DẪN ẢNH ---
   String fixImageUrl(String url) {
     if (url.isEmpty) return '';
-    
+
     // Fix lỗi localhost trên máy ảo
     if (url.contains('localhost')) {
       return url.replaceAll('localhost', '10.0.2.2');
@@ -31,7 +33,8 @@ class ShoppingScreen extends StatelessWidget {
     final String finalUrl = fixImageUrl(rawUrl);
 
     if (finalUrl.isEmpty) {
-      return const Icon(Icons.image_not_supported, color: Colors.grey, size: 40);
+      return const Icon(Icons.image_not_supported,
+          color: Colors.grey, size: 40);
     }
 
     if (finalUrl.startsWith('http')) {
@@ -40,7 +43,7 @@ class ShoppingScreen extends StatelessWidget {
         width: 60,
         height: 60,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => 
+        errorBuilder: (context, error, stackTrace) =>
             const Icon(Icons.broken_image, color: Colors.grey, size: 40),
       );
     }
@@ -73,7 +76,8 @@ class ShoppingScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final item = shoppingController.shoppingItems[index];
                   return Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                     elevation: 2,
@@ -85,7 +89,7 @@ class ShoppingScreen extends StatelessWidget {
                           // --- SỬA LẠI PHẦN ẢNH (Dùng _buildImage) ---
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8),
-                            child: _buildImage(item.product.imageUrl), 
+                            child: _buildImage(item.product.imageUrl),
                           ),
                           const SizedBox(width: 10),
 
@@ -103,7 +107,7 @@ class ShoppingScreen extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 Text(
-                                  'Giá: ${item.product.price.toStringAsFixed(0)} đ',
+                                  'Giá: ${NumberFormatter.formatPrice(item.product.price)}',
                                   style: const TextStyle(color: Colors.grey),
                                 ),
                               ],
@@ -128,7 +132,8 @@ class ShoppingScreen extends StatelessWidget {
                               ),
                               IconButton(
                                 onPressed: () {
-                                  shoppingController.addToShopping(item.product);
+                                  shoppingController
+                                      .addToShopping(item.product);
                                 },
                                 icon: const Icon(Icons.add_circle_outline),
                               ),
@@ -142,7 +147,8 @@ class ShoppingScreen extends StatelessWidget {
                                     duration: const Duration(seconds: 1),
                                   );
                                 },
-                                icon: const Icon(Icons.delete, color: Colors.redAccent),
+                                icon: const Icon(Icons.delete,
+                                    color: Colors.redAccent),
                               ),
                             ],
                           ),
@@ -158,7 +164,7 @@ class ShoppingScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor, 
+                color: Theme.of(context).cardColor,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.withOpacity(0.2),
@@ -171,22 +177,24 @@ class ShoppingScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Obx(() => Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("Tổng cộng:", style: TextStyle(color: Colors.grey)),
-                      Text(
-                        '${shoppingController.totalPrice.toStringAsFixed(0)} đ',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                      ),
-                    ],
-                  )),
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text("Tổng cộng:",
+                              style: TextStyle(color: Colors.grey)),
+                          Text(
+                            NumberFormatter.formatPrice(
+                                shoppingController.totalPrice.value),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ),
+                        ],
+                      )),
                   ElevatedButton.icon(
                     onPressed: () {
-                       Get.snackbar("Thông báo", "Chức năng thanh toán đang phát triển");
+                      Get.to(() => const CheckoutScreen());
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,

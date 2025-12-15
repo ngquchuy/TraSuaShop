@@ -8,6 +8,7 @@ import 'package:milktea_shop/features/help%20center/views/screen/help_center_scr
 import 'package:milktea_shop/features/shipping%20address/shipping_address_screen.dart';
 import 'package:milktea_shop/view/cart_screen.dart';
 import 'package:milktea_shop/view/edit_profile_screen.dart';
+import 'package:milktea_shop/view/order_history_screen.dart';
 import 'package:milktea_shop/view/signin_screen.dart';
 import 'package:milktea_shop/view/wish_list_screen.dart';
 
@@ -18,7 +19,7 @@ class AccountScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeController = Get.find<ThemeController>();
     final userController = Get.find<UserController>();
-    // Lấy AuthController để dùng cho chức năng Đăng xuất
+    // Lấy AuthController để dùng cho chức năng Đăng xu��t
     final authController = Get.find<AuthController>();
 
     return Scaffold(
@@ -33,7 +34,7 @@ class AccountScreen extends StatelessWidget {
             Obx(() {
               // Lấy đường dẫn avatar hiện tại
               final avatarPath = userController.avatarPath.value;
-              
+
               // Quyết định loại ảnh nền (AssetImage hay NetworkImage)
               ImageProvider imageProvider;
               if (avatarPath.startsWith('assets/')) {
@@ -98,9 +99,7 @@ class AccountScreen extends StatelessWidget {
                     icon: Icons.history,
                     title: 'Lịch sử mua hàng',
                     subtitle: 'Xem lại các đơn hàng đã hoàn tất',
-                    onTap: () {
-                      Get.snackbar('Lịch sử', 'Tính năng đang phát triển');
-                    },
+                    onTap: () => Get.to(() => const OrderHistoryScreen()),
                   ),
                   const Divider(height: 1),
                   _buildAccountItem(
@@ -165,9 +164,9 @@ class AccountScreen extends StatelessWidget {
                         onConfirm: () async {
                           // Đăng xuất khỏi Firebase Auth
                           await FirebaseAuth.instance.signOut();
-                          
+
                           // Cập nhật trạng thái ứng dụng (AuthController)
-                          authController.logout(); 
+                          authController.logout();
 
                           Get.offAll(() => SigninScreen());
                           Get.snackbar(

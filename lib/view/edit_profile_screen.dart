@@ -16,6 +16,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   late TextEditingController nameController;
   late TextEditingController emailController;
+  late TextEditingController phoneController;
   String? avatarPath;
 
   @override
@@ -24,22 +25,83 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     nameController = TextEditingController(text: userController.userName.value);
     emailController =
         TextEditingController(text: userController.userEmail.value);
+    phoneController =
+        TextEditingController(text: userController.userPhone.value);
     avatarPath = userController.avatarPath.value;
   }
 
-  //void _saveProfile() {
-  // if (_formKey.currentState!.validate()) {
-  //userController.updateUser(
-  //nameController.text.trim(),
-  //emailController.text.trim(),
-  //avatarPath!,
-  //);
-  //Get.back();
-  //Get.snackbar('Thành công', 'Cập nhật thông tin tài khoản thành công 🎉',
-  // snackPosition: SnackPosition.BOTTOM,
-  // duration: const Duration(seconds: 2));
-  // }
-  //}
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh values từ UserController khi vào lại screen
+    nameController.text = userController.userName.value;
+    emailController.text = userController.userEmail.value;
+    phoneController.text = userController.userPhone.value;
+    avatarPath = userController.avatarPath.value;
+  }
+
+  void _saveProfile() async {
+    if (_formKey.currentState!.validate()) {
+      // Hiển thị loading
+      Get.dialog(
+        const Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
+
+      try {
+        final success = await userController.updateProfileInfo(
+          nameController.text.trim(),
+          emailController.text.trim(),
+          avatarPath ?? userController.avatarPath.value,
+          phoneController.text.trim(),
+          userController.userAddress.value,
+        );
+
+        // Đóng loading dialog
+        Get.back();
+
+        if (success) {
+          Get.back();
+          Get.snackbar(
+            'Thành công',
+            'Cập nhật thông tin tài khoản thành công 🎉',
+            snackPosition: SnackPosition.BOTTOM,
+            duration: const Duration(seconds: 2),
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+          );
+        } else {
+          Get.snackbar(
+            'Lỗi',
+            'Không thể cập nhật thông tin. Vui lòng thử lại.',
+            snackPosition: SnackPosition.BOTTOM,
+            duration: const Duration(seconds: 2),
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
+      } catch (e) {
+        // Đóng loading dialog
+        Get.back();
+        Get.snackbar(
+          'Lỗi',
+          'Lỗi: $e',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +122,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   backgroundImage: avatarPath != null
                       ? (avatarPath!.startsWith('assets/')
                           ? AssetImage(avatarPath!) as ImageProvider
-                          : FileImage(File(avatarPath!)))
+                          : (avatarPath!.startsWith('http')
+                              ? NetworkImage(avatarPath!) as ImageProvider
+                              : FileImage(File(avatarPath!))))
                       : const AssetImage(
                           'assets/images/avatar-with-black-hair-and-hoodie.png'),
                   child: Align(
@@ -105,17 +169,32 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ? 'Email không hợp lệ'
                     : null,
               ),
+              const SizedBox(height: 16),
+
+              // Số điện thoại
+              TextFormField(
+                controller: phoneController,
+                decoration: const InputDecoration(
+                  labelText: 'Số điện thoại',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.phone_outlined),
+                ),
+                keyboardType: TextInputType.phone,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Vui lòng nhập số điện thoại'
+                    : null,
+              ),
               const SizedBox(height: 24),
 
               // Nút lưu
               SizedBox(
                 width: double.infinity,
-                //child: ElevatedButton.icon(
-                //icon: const Icon(Icons.save),
-                //label: const Text('Lưu thay đổi'),
-                //onPressed: _saveProfile,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.save),
+                  label: const Text('Lưu thay đổi'),
+                  onPressed: _saveProfile,
+                ),
               ),
-              // ),
             ],
           ),
         ),

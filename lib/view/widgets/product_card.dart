@@ -4,6 +4,7 @@ import 'package:milktea_shop/models/product.dart';
 import 'package:milktea_shop/utils/app_textstyles.dart';
 import 'package:milktea_shop/controllers/shopping_controller.dart';
 import 'package:milktea_shop/controllers/wish_list_controller.dart';
+import 'package:milktea_shop/utils/number_formatter.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -125,7 +126,7 @@ class ProductCard extends StatelessWidget {
                   children: [
                     // Giá sản phẩm
                     Text(
-                      '${product.price.toStringAsFixed(0)} đ',
+                      NumberFormatter.formatPrice(product.price),
                       style: const TextStyle(
                         color: Colors.brown,
                         fontSize: 14,

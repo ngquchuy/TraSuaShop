@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:milktea_shop/controllers/shopping_controller.dart';
+import 'package:milktea_shop/utils/number_formatter.dart';
 import 'package:milktea_shop/view/product_detail_screen.dart';
 
 class ProductGrid extends StatelessWidget {
@@ -10,7 +11,7 @@ class ProductGrid extends StatelessWidget {
   // Hàm này giúp App hiển thị được ảnh từ localhost hoặc folder uploads
   String fixImageUrl(String url) {
     if (url.isEmpty) return '';
-    
+
     // Nếu link chứa localhost -> Đổi thành 10.0.2.2 cho máy ảo Android
     if (url.contains('localhost')) {
       return url.replaceAll('localhost', '10.0.2.2');
@@ -49,7 +50,8 @@ class ProductGrid extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 0.70, // Tỷ lệ khung hình (cao hơn chút để chứa nút tim)
+          childAspectRatio:
+              0.70, // Tỷ lệ khung hình (cao hơn chút để chứa nút tim)
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
         ),
@@ -82,7 +84,8 @@ class ProductGrid extends StatelessWidget {
                       // --- A. ẢNH SẢN PHẨM ---
                       Expanded(
                         child: ClipRRect(
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+                          borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(15)),
                           child: Container(
                             width: double.infinity,
                             color: Colors.grey[200],
@@ -101,30 +104,36 @@ class ProductGrid extends StatelessWidget {
                               product.name,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 14),
                             ),
                             const SizedBox(height: 4),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  '${product.price.toStringAsFixed(0)} đ',
+                                  NumberFormatter.formatPrice(product.price),
                                   style: TextStyle(
                                     color: Theme.of(context).primaryColor,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15,
                                   ),
                                 ),
-                                // Nút thêm nhanh (+)
+                                // Nút thêm nhanh (+) - Navigate to ProductDetailScreen
                                 InkWell(
-                                  onTap: () => controller.addToShopping(product),
+                                  onTap: () {
+                                    // Chuyển sang ProductDetailScreen thay vì add trực tiếp
+                                    Get.to(() =>
+                                        ProductDetailScreen(product: product));
+                                  },
                                   child: Container(
                                     padding: const EdgeInsets.all(5),
                                     decoration: BoxDecoration(
                                       color: Theme.of(context).primaryColor,
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(Icons.add, color: Colors.white, size: 16),
+                                    child: const Icon(Icons.add,
+                                        color: Colors.white, size: 16),
                                   ),
                                 )
                               ],
@@ -147,12 +156,15 @@ class ProductGrid extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.8), // Nền mờ cho dễ nhìn
+                          color: Colors.white
+                              .withOpacity(0.8), // Nền mờ cho dễ nhìn
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           // Kiểm tra trạng thái để hiện tim đỏ hoặc tim rỗng
-                          product.isFavorite ? Icons.favorite : Icons.favorite_border,
+                          product.isFavorite
+                              ? Icons.favorite
+                              : Icons.favorite_border,
                           color: product.isFavorite ? Colors.red : Colors.grey,
                           size: 20,
                         ),
@@ -182,8 +194,8 @@ class ProductGrid extends StatelessWidget {
       return Image.network(
         finalUrl,
         fit: BoxFit.cover,
-        errorBuilder: (c, o, s) => const Center(
-            child: Icon(Icons.broken_image, color: Colors.red)),
+        errorBuilder: (c, o, s) =>
+            const Center(child: Icon(Icons.broken_image, color: Colors.red)),
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return Center(

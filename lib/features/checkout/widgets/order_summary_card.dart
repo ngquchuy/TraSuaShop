@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:milktea_shop/controllers/shopping_controller.dart';
 import 'package:milktea_shop/utils/app_textstyles.dart';
+import 'package:milktea_shop/utils/number_formatter.dart';
 
 class OrderSummaryCard extends StatelessWidget {
   const OrderSummaryCard({super.key});
@@ -29,21 +30,17 @@ class OrderSummaryCard extends StatelessWidget {
       child: Column(
         children: [
           _buildSummaryRow(context, 'Tạm tính',
-              '${shoppingController.totalPrice.toStringAsFixed(0)}đ'),
-          const SizedBox(
-            height: 8,
-          ),
-          _buildSummaryRow(context, 'Phí áp dụng', '0đ'),
-          const SizedBox(
-            height: 8,
-          ),
-          _buildSummaryRow(context, 'Giảm giá', '-0đ'),
+              NumberFormatter.formatPrice(shoppingController.totalPrice.value)),
+          const SizedBox(height: 8),
+          _buildSummaryRow(context, 'Phí áp dụng', '0 đ'),
+          const SizedBox(height: 8),
+          _buildSummaryRow(context, 'Giảm giá', '-0 đ'),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
             child: Divider(),
           ),
           _buildSummaryRow(context, 'Tổng giá',
-              '${shoppingController.totalPrice.toStringAsFixed(0)}đ',
+              NumberFormatter.formatPrice(shoppingController.totalPrice.value),
               isTotal: true),
         ],
       ),

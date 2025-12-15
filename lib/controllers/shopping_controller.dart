@@ -1,21 +1,31 @@
 import 'package:get/get.dart';
 import 'package:milktea_shop/models/product.dart';
+import 'package:milktea_shop/models/item_option.dart';
 import '../services/api_service.dart';
 
-// Model phụ cho giỏ hàng (Lưu sản phẩm + số lượng)
+// Model phụ cho giỏ hàng (Lưu sản phẩm + số lượng + options + notes)
 class ShoppingItem {
   final Product product;
   int quantity;
-  ShoppingItem({required this.product, this.quantity = 1});
+  List<OptionGroup> selectedOptions;
+  String notes;
+
+  ShoppingItem({
+    required this.product,
+    this.quantity = 1,
+    this.selectedOptions = const [],
+    this.notes = '',
+  });
 }
 
 class ShoppingController extends GetxController {
   // ==================================================
   // PHẦN 1: QUẢN LÝ DANH SÁCH SẢN PHẨM (TÌM KIẾM, TIM)
   // ==================================================
-  var products = <Product>[].obs;          // Danh sách gốc (Tất cả sp từ API)
-  var filteredProducts = <Product>[].obs;  // Danh sách hiển thị (Đã lọc theo từ khóa)
-  var isLoading = true.obs;                // Trạng thái đang tải
+  var products = <Product>[].obs; // Danh sách gốc (Tất cả sp từ API)
+  var filteredProducts =
+      <Product>[].obs; // Danh sách hiển thị (Đã lọc theo từ khóa)
+  var isLoading = true.obs; // Trạng thái đang tải
 
   @override
   void onInit() {
@@ -30,7 +40,8 @@ class ShoppingController extends GetxController {
       var list = await ApiService.fetchProducts();
       if (list.isNotEmpty) {
         products.assignAll(list);
-        filteredProducts.assignAll(list); // Ban đầu chưa tìm kiếm gì thì hiện tất cả
+        filteredProducts
+            .assignAll(list); // Ban đầu chưa tìm kiếm gì thì hiện tất cả
       }
     } finally {
       isLoading(false);
@@ -44,8 +55,9 @@ class ShoppingController extends GetxController {
       filteredProducts.assignAll(products);
     } else {
       // Lọc danh sách theo tên (không phân biệt hoa thường)
-      var result = products.where((p) => 
-          p.name.toLowerCase().contains(query.toLowerCase())).toList();
+      var result = products
+          .where((p) => p.name.toLowerCase().contains(query.toLowerCase()))
+          .toList();
       filteredProducts.assignAll(result);
     }
   }
@@ -55,7 +67,7 @@ class ShoppingController extends GetxController {
     final index = products.indexWhere((p) => p.id == productId);
     if (index != -1) {
       final old = products[index];
-      
+
       // Tạo bản sao sản phẩm mới với trạng thái tim bị đảo ngược
       final newProduct = Product(
         id: old.id,
@@ -78,7 +90,7 @@ class ShoppingController extends GetxController {
       if (filterIndex != -1) {
         filteredProducts[filterIndex] = newProduct;
       }
-      
+
       // Bắt buộc gọi refresh để UI vẽ lại
       products.refresh();
       filteredProducts.refresh();
@@ -93,29 +105,38 @@ class ShoppingController extends GetxController {
   var totalPrice = 0.0.obs;
 
   // 4. Thêm vào giỏ hàng
-  void addToShopping(Product product) {
-     // Kiểm tra xem sản phẩm này đã có trong giỏ chưa
-     final existing = shoppingItems
-        .firstWhereOrNull((item) => item.product.id == product.id);
+  void addToShopping(Product product,
+      {List<OptionGroup> options = const [], String notes = ''}) {
+    // Kiểm tra xem sản phẩm này đã có trong giỏ chưa
+    final existing =
+        shoppingItems.firstWhereOrNull((item) => item.product.id == product.id);
 
     if (existing != null) {
       existing.quantity++; // Có rồi thì tăng số lượng
     } else {
-      shoppingItems.add(ShoppingItem(product: product)); // Chưa có thì thêm mới
+      shoppingItems.add(
+        ShoppingItem(
+          product: product,
+          selectedOptions: options,
+          notes: notes,
+        ),
+      );
     }
     shoppingItems.refresh(); // Cập nhật UI giỏ hàng
-    updateTotal();           // Tính lại tổng tiền
-    
+    updateTotal(); // Tính lại tổng tiền
+
     // Hiện thông báo nhỏ (chỉ hiện nếu chưa có thông báo nào đang chạy)
     if (!Get.isSnackbarOpen) {
       Get.snackbar("Thành công", "Đã thêm ${product.name} vào giỏ",
-        duration: const Duration(seconds: 1), snackPosition: SnackPosition.TOP);
+          duration: const Duration(seconds: 1),
+          snackPosition: SnackPosition.TOP);
     }
   }
 
   // 5. Tính tổng tiền
   void updateTotal() {
-    totalPrice.value = shoppingItems.fold(0.0, (sum, item) => sum + item.product.price * item.quantity);
+    totalPrice.value = shoppingItems.fold(
+        0.0, (sum, item) => sum + item.product.price * item.quantity);
   }
 
   // 6. Giảm số lượng (Nút trừ trong giỏ hàng)
@@ -125,9 +146,9 @@ class ShoppingController extends GetxController {
       if (shoppingItems[index].quantity > 1) {
         shoppingItems[index].quantity--; // Giảm 1
       } else {
-        shoppingItems.removeAt(index);   // Hết số lượng thì xóa luôn
+        shoppingItems.removeAt(index); // Hết số lượng thì xóa luôn
       }
-      shoppingItems.refresh(); 
+      shoppingItems.refresh();
       updateTotal();
     }
   }
@@ -135,13 +156,13 @@ class ShoppingController extends GetxController {
   // 7. Xóa hẳn khỏi giỏ hàng (Nút thùng rác)
   void removeFromShopping(ShoppingItem item) {
     shoppingItems.remove(item);
-    shoppingItems.refresh(); 
+    shoppingItems.refresh();
     updateTotal();
   }
 
   // 8. Xóa sạch giỏ hàng (Sau khi thanh toán xong)
   void clearShopping() {
     shoppingItems.clear();
-    updateTotal();
+    totalPrice.value = 0;
   }
 } // <-- Dấu ngoặc đóng class ShoppingController

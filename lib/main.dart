@@ -21,7 +21,6 @@ Future<void> main() async {
 
   await GetStorage.init();
 
-  // put controller sau khi firebase init
   Get.put(ThemeController());
   Get.put(AuthController());
   Get.put(NavigationController());

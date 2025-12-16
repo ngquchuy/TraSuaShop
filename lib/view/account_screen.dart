@@ -1,15 +1,13 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:milktea_shop/controllers/auth_controller.dart'; // THÊM IMPORT NÀY
 import 'package:milktea_shop/controllers/theme_controller.dart';
 import 'package:milktea_shop/controllers/user_controller.dart';
+import 'package:milktea_shop/services/auth_service.dart';
+import 'package:milktea_shop/view/signin_screen.dart';
 import 'package:milktea_shop/features/help%20center/views/screen/help_center_screen.dart';
 import 'package:milktea_shop/features/shipping%20address/shipping_address_screen.dart';
+import 'package:milktea_shop/view/main_screen.dart';
 import 'package:milktea_shop/view/shopping_screen.dart';
-import 'package:milktea_shop/view/edit_profile_screen.dart';
-import 'package:milktea_shop/view/order_history_screen.dart';
-import 'package:milktea_shop/view/signin_screen.dart';
 import 'package:milktea_shop/view/wish_list_screen.dart';
 
 class AccountScreen extends StatelessWidget {
@@ -17,183 +15,214 @@ class AccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Gọi các controller
     final themeController = Get.find<ThemeController>();
     final userController = Get.find<UserController>();
-    // Lấy AuthController để dùng cho chức năng Đăng xu��t
-    final authController = Get.find<AuthController>();
+    final AuthService _authService = AuthService();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tài khoản của tôi'),
         centerTitle: true,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(0),
         child: Column(
           children: [
             Obx(() {
-              // Lấy đường dẫn avatar hiện tại
+              // Lấy đường dẫn avatar từ Controller
               final avatarPath = userController.avatarPath.value;
 
-              // Quyết định loại ảnh nền (AssetImage hay NetworkImage)
               ImageProvider imageProvider;
-              if (avatarPath.startsWith('assets/')) {
-                // Nếu là đường dẫn cục bộ (asset)
-                imageProvider = AssetImage(avatarPath);
-              } else {
-                // Giả định là URL (sau khi đăng nhập Google/chỉnh sửa)
+              if (avatarPath.contains('http')) {
                 imageProvider = NetworkImage(avatarPath);
+              } else {
+                imageProvider = AssetImage(avatarPath);
               }
 
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0),
+              return Container(
+                padding: const EdgeInsets.symmetric(vertical: 30.0),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(30),
+                    bottomRight: Radius.circular(30),
+                  ),
+                ),
                 child: Column(
                   children: [
                     CircleAvatar(
-                      radius: 50,
-                      // SỬ DỤNG imageProvider ĐÃ ĐƯỢC XÁC ĐỊNH
+                      radius: 55,
                       backgroundImage: imageProvider,
+                      onBackgroundImageError: (_, __) {
+                        // Xử lý lỗi nếu ảnh mạng bị hỏng thì không làm gì (nó sẽ hiện màu nền)
+                      },
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 15),
                     Text(
-                      userController.userName.value,
+                      userController.userName.value, // Tên lấy từ MongoDB
                       style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold),
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    Text(
-                      userController.userEmail.value,
-                      style: const TextStyle(color: Colors.grey),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        userController.userEmail.value,
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                   ],
                 ),
               );
             }),
+
             const SizedBox(height: 20),
 
-            // 🧾 Danh sách chức năng tài khoản
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 2,
-              child: Column(
-                children: [
-                  _buildAccountItem(
-                    context,
-                    icon: Icons.shopping_cart_outlined,
-                    title: 'Đơn hàng của tôi',
-                    subtitle: 'Xem trạng thái đơn hàng và chi tiết',
-                    onTap: () => Get.to(() => ShoppingScreen()),
-                  ),
-                  const Divider(height: 1),
-                  _buildAccountItem(
-                    context,
-                    icon: Icons.favorite_border,
-                    title: 'Danh sách yêu thích',
-                    subtitle: 'Các sản phẩm bạn đã yêu thích',
-                    onTap: () => Get.to(() => const WishListScreen()),
-                  ),
-                  const Divider(height: 1),
-                  _buildAccountItem(
-                    context,
-                    icon: Icons.history,
-                    title: 'Lịch sử mua hàng',
-                    subtitle: 'Xem lại các đơn hàng đã hoàn tất',
-                    onTap: () => Get.to(() => const OrderHistoryScreen()),
-                  ),
-                  const Divider(height: 1),
-                  _buildAccountItem(
-                    context,
-                    icon: Icons.location_on,
-                    title: 'Địa chỉ',
-                    subtitle: 'Địa chỉ nhận hàng của bạn',
-                    onTap: () => Get.to(() => ShippingAdressScreen()),
-                  ),
-                  const Divider(height: 1),
-                  _buildAccountItem(
-                    context,
-                    icon: Icons.settings,
-                    title: 'Chỉnh sửa hồ sơ',
-                    subtitle: 'Chỉnh sửa thông tin cá nhân',
-                    onTap: () => Get.to(() => const EditProfileScreen()),
-                  ),
-                  const Divider(
-                    thickness: 10,
-                  ),
-                  // 🌗 Dark / Light mode toggle
-                  GetBuilder<ThemeController>(
-                    builder: (_) => SwitchListTile(
-                      value: themeController.isDarkMode,
-                      title: const Text('Chế độ tối'),
-                      secondary: const Icon(Icons.dark_mode),
-                      onChanged: (val) => themeController.toggleTheme(),
+            // --- DANH SÁCH CHỨC NĂNG ---
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 4,
+                child: Column(
+                  children: [
+                    _buildAccountItem(
+                      context,
+                      icon: Icons.shopping_bag_outlined,
+                      title: 'Đơn hàng của tôi',
+                      subtitle: 'Theo dõi trạng thái đơn hàng',
+                      onTap: () => Get.to(() => ShoppingScreen()),
                     ),
-                  ),
-                  const Divider(height: 1),
-                  _buildAccountItem(
-                    context,
-                    icon: Icons.support_agent_outlined,
-                    title: 'Hỗ trợ',
-                    subtitle: 'Liên hệ với chúng tôi',
-                    onTap: () => Get.to(() => const HelpCenterScreen()),
-                  ),
-                  const Divider(height: 1),
-                  _buildAccountItem(
-                    context,
-                    icon: Icons.article_outlined,
-                    title: 'Điều khoản & Chính sách',
-                    subtitle: 'Liên hệ với chúng tôi',
-                    onTap: () {
-                      Get.snackbar('Điều khoản và chính sách',
-                          'Tính năng đang phát triển');
-                    },
-                  ),
-                  const Divider(height: 1),
-                  _buildAccountItem(
-                    context,
-                    icon: Icons.logout,
-                    title: 'Đăng xuất',
-                    subtitle: 'Thoát khỏi tài khoản hiện tại',
-                    onTap: () {
-                      Get.defaultDialog(
-                        title: 'Xác nhận đăng xuất',
-                        middleText: 'Bạn có chắc muốn đăng xuất không?',
-                        textConfirm: 'Đăng xuất',
-                        textCancel: 'Hủy',
-                        confirmTextColor: Colors.white,
-                        onConfirm: () async {
-                          // Đăng xuất khỏi Firebase Auth
-                          await FirebaseAuth.instance.signOut();
+                    _buildDivider(),
+                    _buildAccountItem(
+                      context,
+                      icon: Icons.favorite_border,
+                      title: 'Yêu thích',
+                      subtitle: 'Sản phẩm đã lưu',
+                      onTap: () => Get.to(() => const WishListScreen()),
+                    ),
+                    _buildDivider(),
+                    _buildAccountItem(
+                      context,
+                      icon: Icons.location_on_outlined,
+                      title: 'Sổ địa chỉ',
+                      subtitle: 'Quản lý địa chỉ giao hàng',
+                      onTap: () => Get.to(() => ShippingAdressScreen()),
+                    ),
+                    _buildDivider(),
 
-                          // Cập nhật trạng thái ứng dụng (AuthController)
-                          authController.logout();
+                    // Toggle Dark Mode
+                    GetBuilder<ThemeController>(
+                      builder: (_) => SwitchListTile(
+                        activeColor: Theme.of(context).primaryColor,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 5),
+                        value: themeController.isDarkMode,
+                        title: const Text('Giao diện tối',
+                            style: TextStyle(fontWeight: FontWeight.w600)),
+                        secondary: Icon(
+                          themeController.isDarkMode
+                              ? Icons.dark_mode
+                              : Icons.light_mode,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        onChanged: (val) => themeController.toggleTheme(),
+                      ),
+                    ),
 
-                          Get.offAll(() => SigninScreen());
-                          Get.snackbar(
-                              'Đăng xuất', 'Bạn đã đăng xuất thành công');
-                        },
-                      );
-                    },
-                  ),
-                ],
+                    _buildDivider(),
+                    _buildAccountItem(
+                      context,
+                      icon: Icons.logout,
+                      title: 'Đăng xuất',
+                      subtitle: 'Thoát tài khoản',
+                      textColor: Colors.red, // Làm nổi bật nút đăng xuất
+                      onTap: () {
+                        Get.defaultDialog(
+                          title: 'Đăng xuất',
+                          middleText: 'Bạn có chắc chắn muốn đăng xuất?',
+                          textConfirm: 'Đồng ý',
+                          textCancel: 'Hủy',
+                          confirmTextColor: Colors.white,
+                          buttonColor: Colors.red,
+                          onConfirm: () async {
+                            // 1. Xóa token trong bộ nhớ máy
+                            await _authService.logout();
+
+                            // 2. Reset dữ liệu trong UserController về mặc định
+                            userController.clearData();
+
+                            // 3. Quay về màn hình đăng nhập & xóa lịch sử
+                            Get.offAll(() => SigninScreen());
+
+                            Get.snackbar('Thành công', 'Đã đăng xuất an toàn.');
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
+            const SizedBox(height: 30),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAccountItem(BuildContext context,
-      {required IconData icon,
-      required String title,
-      required String subtitle,
-      required VoidCallback onTap}) {
+  // Widget con để vẽ Divider đẹp hơn
+  Widget _buildDivider() {
+    return const Divider(
+      height: 1,
+      indent: 20,
+      endIndent: 20,
+      color: Colors.grey,
+    );
+  }
+
+  // Widget item tái sử dụng
+  Widget _buildAccountItem(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    required VoidCallback onTap,
+    Color? textColor,
+  }) {
     return ListTile(
-      leading: Icon(icon, color: Theme.of(context).primaryColor),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-      subtitle: Text(subtitle),
-      trailing: const Icon(Icons.chevron_right),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).primaryColor.withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: textColor ?? Theme.of(context).primaryColor),
+      ),
+      title: Text(title,
+          style: TextStyle(
+              fontWeight: FontWeight.w600, color: textColor ?? Colors.black87)),
+      subtitle: subtitle != null
+          ? Text(subtitle, style: const TextStyle(fontSize: 12))
+          : null,
+      trailing:
+          const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
       onTap: onTap,
     );
   }

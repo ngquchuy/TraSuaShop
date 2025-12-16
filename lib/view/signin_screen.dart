@@ -7,18 +7,69 @@ import 'package:milktea_shop/view/forgot_password_screen.dart';
 import 'package:milktea_shop/view/main_screen.dart';
 import 'package:milktea_shop/view/signup_screen.dart';
 import 'package:milktea_shop/view/widgets/custom_textfield.dart';
+import '../controllers/user_controller.dart';
+import '../services/auth_service.dart';
+import 'package:logger/logger.dart';
 
 class SigninScreen extends StatelessWidget {
   SigninScreen({super.key});
 
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   // Khởi tạo AuthController để sử dụng cho cả email/pass và Google
   final AuthController authController = Get.find<AuthController>();
+  final AuthService _authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final logger = Logger(
+      printer: PrettyPrinter(),
+    );
+
+    void _handleLogin() async {
+      String username = _usernameController.text;
+      String password = _passwordController.text;
+
+      // Log thông báo bắt đầu xử lý (Optional - để debug luồng chạy)
+      logger.d("Bắt đầu xử lý đăng nhập cho: $username");
+
+      // Gọi API
+      var result = await _authService.login(username, password);
+
+      if (result != null) {
+        // Đăng nhập thành công
+        // 3. Thay thế print bằng logger.i (Info)
+        logger.i("Đăng nhập thành công. Token: ${result['token']}");
+
+        //Lưu token vào bộ nhớ máy
+        String token =
+            result['token']; // Đảm bảo backend trả về key tên là 'token'
+
+        // Lưu token vào bộ nhớ máy an toàn
+        await _authService.saveToken(token);
+
+        final userController = Get.find<UserController>();
+        userController.setUserData(result);
+
+        if (!context.mounted) return;
+
+        // Chuyển sang trang Dashboard
+        Get.offAll(() => const MainScreen());
+      } else {
+        // 4. Thêm log cảnh báo (Warning) khi đăng nhập thất bại
+        logger.w("Đăng nhập thất bại: Tên đăng nhập hoặc mật khẩu không đúng");
+
+        if (!context.mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text("Tên đăng nhập hoặc mật khẩu không đúng")),
+        );
+      }
+    }
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -45,16 +96,16 @@ class SigninScreen extends StatelessWidget {
               const SizedBox(height: 40),
               //Email textfield
               CustomTextfield(
-                label: 'Email',
-                prefixIcon: Icons.email_outlined,
+                label: 'Tên đăng nhập',
+                prefixIcon: Icons.person_2_rounded,
                 keyboardType: TextInputType.emailAddress,
-                controller: _emailController,
+                controller: _usernameController,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Vui lòng nhập email của bạn';
+                    return 'Vui lòng nhập tên đăng nhập của bạn';
                   }
                   if (!GetUtils.isEmail(value)) {
-                    return 'Email của bạn không hợp lệ';
+                    return 'Tên đăng nhập của bạn không hợp lệ';
                   }
                   return null;
                 },
@@ -95,8 +146,7 @@ class SigninScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                    onPressed: () =>
-                        _handleSignIn(context), // Cập nhật cách gọi
+                    onPressed: () => _handleLogin(), // Cập nhật cách gọi
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -159,8 +209,9 @@ class SigninScreen extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: () => _handleGoogleSignIn(context),
-                  icon: Image.asset('assets/images/google_logo.png',
-                      width: 24,
+                  icon: Image.asset(
+                    'assets/images/google_logo.png',
+                    width: 24,
                     height: 24,
                   ),
                   label: Text(
@@ -218,14 +269,6 @@ class SigninScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  // Hàm xử lý Đăng nhập bằng Email/Password
-  void _handleSignIn(BuildContext context) {
-    // Thường cần Form Key để validate trước khi gọi API
-    authController.login();
-    // Giả sử logic login thành công và chuyển trang
-    Get.offAll(() => const MainScreen());
   }
 
   // Hàm xử lý Đăng nhập bằng Google (MỚI)

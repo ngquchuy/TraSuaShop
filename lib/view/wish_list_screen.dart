@@ -4,7 +4,7 @@ import 'package:milktea_shop/controllers/shopping_controller.dart';
 import 'package:milktea_shop/controllers/wish_list_controller.dart'; // Import WishListController
 import 'package:milktea_shop/models/product.dart';
 import 'package:milktea_shop/utils/number_formatter.dart';
-import 'package:milktea_shop/view/cart_screen.dart'; // Import CartScreen
+import 'package:milktea_shop/view/shopping_screen.dart'; // Import ShoppingScreen
 import 'package:milktea_shop/view/product_detail_screen.dart'; // Import ProductDetailScreen
 
 class WishListScreen extends StatelessWidget {
@@ -63,7 +63,7 @@ class WishListScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.shopping_cart_outlined),
             onPressed: () {
-              Get.to(() => CartScreen());
+              Get.to(() => ShoppingScreen());
             },
           ),
           // 🗑️ Xóa toàn bộ danh sách yêu thích

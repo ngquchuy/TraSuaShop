@@ -6,7 +6,7 @@ import 'package:milktea_shop/models/item_option.dart';
 import 'package:milktea_shop/models/product.dart';
 import 'package:milktea_shop/utils/app_textstyles.dart';
 import 'package:share_plus/share_plus.dart'; // Import share_plus
-import 'package:milktea_shop/view/cart_screen.dart'; // Import CartScreen để chuyển hướng
+import 'package:milktea_shop/view/shopping_screen.dart'; // Import ShoppingScreen để chuyển hướng
 import 'package:milktea_shop/utils/number_formatter.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -112,11 +112,37 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return basePrice + optionPrice;
   }
 
+  // Hàm tính tổng giá với giảm giá nếu số lượng > 20
+  double _calculateFinalTotal() {
+    double pricePerUnit = _calculateTotalPrice();
+    double total = pricePerUnit * _quantity;
+
+    // Áp dụng giảm giá 15% nếu số lượng > 20
+    if (_quantity > 20) {
+      total = total * 0.85; // Giảm 15%
+    }
+    return total;
+  }
+
   void _updateQuantity(int newQuantity) {
     if (newQuantity >= 1) {
       setState(() {
         _quantity = newQuantity;
       });
+
+      // Hiển thị thông báo giảm giá nếu số lượng > 20
+      if (newQuantity > 20) {
+        Get.snackbar(
+          'Ưu đãi đặc biệt!',
+          'Bạn sẽ được giảm 15% cho đơn hàng này',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 2),
+          margin: const EdgeInsets.all(12),
+          borderRadius: 12,
+        );
+      }
     }
   }
 
@@ -240,7 +266,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               shape: BoxShape.circle,
             ),
             child: IconButton(
-                onPressed: () => Get.to(() => CartScreen()),
+                onPressed: () => Get.to(() => ShoppingScreen()),
                 icon: const Icon(Icons.shopping_cart, color: Colors.white)),
           )
         ],
@@ -443,7 +469,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   Widget _buildBottomBar(BuildContext context) {
-    double currentTotal = _calculateTotalPrice() * _quantity;
+    double pricePerUnit = _calculateTotalPrice();
+    double currentTotal = _calculateFinalTotal();
+    double discountAmount =
+        (_quantity > 20) ? (pricePerUnit * _quantity * 0.15) : 0;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -467,7 +496,27 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (_quantity > 20) ...[
+                      const Text('Tổng (gốc):'),
+                      Text(
+                        NumberFormatter.formatPrice(pricePerUnit * _quantity),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                          decoration: TextDecoration.lineThrough,
+                        ),
+                      ),
+                    ],
                     const Text('Tổng cộng:'),
+                    Text(
+                      'Giảm ${_quantity > 20 ? '15%' : '0%'}: -${NumberFormatter.formatPrice(discountAmount)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: discountAmount > 0 ? Colors.green : Colors.grey,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
                     Text(
                       NumberFormatter.formatPrice(currentTotal),
                       style: TextStyle(
@@ -552,16 +601,29 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   void _addToCart() {
     if (_isSelectionValid()) {
-      for (int i = 0; i < _quantity; i++) {
-        shoppingController.addToShopping(
-          widget.product,
-          options: _optionGroups,
-          notes: _noteController.text.trim(),
-        );
-      }
+      // Thêm toàn bộ số lượng cùng lúc (thay vì thêm từng cái một)
+      shoppingController.addToShopping(
+        widget.product,
+        options: _optionGroups,
+        notes: _noteController.text.trim(),
+        quantity: _quantity,
+      );
 
-      Future.delayed(const Duration(milliseconds: 500), () {
-        Get.back();
+      // Hiển thị thông báo thành công
+      Get.snackbar(
+        'Thành công',
+        '${widget.product.name} × $_quantity đã thêm vào giỏ',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 2),
+        margin: const EdgeInsets.all(12),
+        borderRadius: 12,
+      );
+
+      // Chuyển sang ShoppingScreen sau 1 giây
+      Future.delayed(const Duration(seconds: 1), () {
+        Get.to(() => ShoppingScreen());
       });
     } else {
       Get.snackbar(

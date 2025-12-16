@@ -110,6 +110,17 @@ class CartScreen extends StatelessWidget {
                                   'Giá: ${NumberFormatter.formatPrice(item.product.price)}',
                                   style: const TextStyle(color: Colors.grey),
                                 ),
+                                if (item.discountPercentage > 0) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Giảm ${item.discountPercentage.toStringAsFixed(0)}%',
+                                    style: const TextStyle(
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),

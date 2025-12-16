@@ -12,6 +12,18 @@ class OrderSummaryCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ShoppingController shoppingController =
         Get.find<ShoppingController>();
+
+    // Tính tổng giá gốc (không giảm)
+    double totalOriginal = 0.0;
+    double totalDiscount = 0.0;
+    for (var item in shoppingController.shoppingItems) {
+      double itemTotal = item.product.price * item.quantity;
+      totalOriginal += itemTotal;
+      if (item.discountPercentage > 0) {
+        totalDiscount += itemTotal * (item.discountPercentage / 100);
+      }
+    }
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -29,12 +41,14 @@ class OrderSummaryCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildSummaryRow(context, 'Tạm tính',
-              NumberFormatter.formatPrice(shoppingController.totalPrice.value)),
+          _buildSummaryRow(
+              context, 'Tạm tính', NumberFormatter.formatPrice(totalOriginal)),
           const SizedBox(height: 8),
           _buildSummaryRow(context, 'Phí áp dụng', '0 đ'),
           const SizedBox(height: 8),
-          _buildSummaryRow(context, 'Giảm giá', '-0 đ'),
+          _buildSummaryRow(context, 'Giảm giá',
+              '-${NumberFormatter.formatPrice(totalDiscount)}',
+              isDiscount: totalDiscount > 0),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
             child: Divider(),
@@ -48,11 +62,15 @@ class OrderSummaryCard extends StatelessWidget {
   }
 
   Widget _buildSummaryRow(BuildContext context, String label, String value,
-      {bool isTotal = false}) {
+      {bool isTotal = false, bool isDiscount = false}) {
     final textStyle = isTotal ? AppTextstyles.h3 : AppTextstyles.bodyLarge;
-    final color = isTotal
-        ? Theme.of(context).primaryColor
-        : Theme.of(context).textTheme.bodyLarge!.color!;
+    Color color = Theme.of(context).textTheme.bodyLarge!.color!;
+
+    if (isTotal) {
+      color = Theme.of(context).primaryColor;
+    } else if (isDiscount && value != '-0 đ') {
+      color = Colors.green;
+    }
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -59,18 +59,34 @@ class CheckoutScreen extends StatelessWidget {
           ],
         ), // Column
       ),
-      bottomNavigationBar: CheckoutBottomBar(
-        totalAmount: 45000,
-        onPlaceOrder: () {
-          final orderNumber =
-              'ORDS${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+      bottomNavigationBar: Obx(() => CheckoutBottomBar(
+            totalAmount: shoppingController.totalPrice.value,
+            onPlaceOrder: () {
+              if (shoppingController.shoppingItems.isEmpty) {
+                Get.snackbar(
+                  'Lỗi',
+                  'Giỏ hàng của bạn đang trống',
+                  snackPosition: SnackPosition.TOP,
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+                return;
+              }
 
-          Get.to(() => OrderConfirmationScreen(
-                orderNumber: orderNumber,
-                totalAmount: 45000,
-              ));
-        },
-      ),
+              final orderNumber =
+                  'ORDS${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+              final totalAmount = shoppingController.totalPrice.value;
+
+              // Chuyển tới OrderConfirmationScreen
+              Get.to(() => OrderConfirmationScreen(
+                    orderNumber: orderNumber,
+                    totalAmount: totalAmount,
+                  ))?.then((_) {
+                // Xóa giỏ hàng sau khi quay lại từ OrderConfirmationScreen
+                shoppingController.clearShopping();
+              });
+            },
+          )),
     );
   }
 

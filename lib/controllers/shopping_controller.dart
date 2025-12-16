@@ -9,12 +9,14 @@ class ShoppingItem {
   int quantity;
   List<OptionGroup> selectedOptions;
   String notes;
+  double discountPercentage; // Lưu phần trăm giảm giá (0 hoặc 15)
 
   ShoppingItem({
     required this.product,
     this.quantity = 1,
     this.selectedOptions = const [],
     this.notes = '',
+    this.discountPercentage = 0,
   });
 }
 
@@ -26,6 +28,7 @@ class ShoppingController extends GetxController {
   var filteredProducts =
       <Product>[].obs; // Danh sách hiển thị (Đã lọc theo từ khóa)
   var isLoading = true.obs; // Trạng thái đang tải
+  var selectedCategory = 'ALL'.obs; // Danh mục đã chọn (mặc định là ALL)
 
   @override
   void onInit() {
@@ -57,6 +60,52 @@ class ShoppingController extends GetxController {
       // Lọc danh sách theo tên (không phân biệt hoa thường)
       var result = products
           .where((p) => p.name.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+      filteredProducts.assignAll(result);
+    }
+  }
+
+  // 2.5. Hàm lọc theo danh mục
+  void filterByCategory(String category) {
+    selectedCategory.value = category;
+
+    if (category == 'ALL') {
+      // Hiển thị tất cả sản phẩm
+      filteredProducts.assignAll(products);
+    } else if (category == 'Trà sữa') {
+      // Chỉ hiển thị sản phẩm có tên chứa "trà sữa"
+      var result = products
+          .where((p) => p.name.toLowerCase().contains('trà sữa'))
+          .toList();
+      filteredProducts.assignAll(result);
+    } else if (category == 'Trà trái cây') {
+      // Hiển thị sản phẩm liên quan tới hoa quả
+      var fruitKeywords = [
+        'dâu', // Dâu
+        'đào', // Đào
+        'dưa lưới', // Dưa lưới
+        'cam', // Cam
+        'chanh', // Chanh
+        'lemon', // Lemon
+        'strawberry', // Strawberry (tiếng Anh)
+        'mango', // Mango
+        'peach', // Peach
+        'melon', // Melon
+        'passion', // Passion fruit
+        'kiwi', // Kiwi
+        'táo', // Táo
+        'bưởi', // Bưởi
+        'pomelo', // Pomelo
+      ];
+      var result = products.where((p) {
+        String nameLower = p.name.toLowerCase();
+        return fruitKeywords.any((keyword) => nameLower.contains(keyword));
+      }).toList();
+      filteredProducts.assignAll(result);
+    } else if (category == 'Hồng trà') {
+      // Chỉ hiển thị sản phẩm có tên chứa "hồng trà"
+      var result = products
+          .where((p) => p.name.toLowerCase().contains('hồng trà'))
           .toList();
       filteredProducts.assignAll(result);
     }
@@ -106,19 +155,28 @@ class ShoppingController extends GetxController {
 
   // 4. Thêm vào giỏ hàng
   void addToShopping(Product product,
-      {List<OptionGroup> options = const [], String notes = ''}) {
+      {List<OptionGroup> options = const [],
+      String notes = '',
+      int quantity = 1}) {
+    // Tính phần trăm giảm giá (15% nếu quantity > 20)
+    double discountPercentage = quantity > 20 ? 15 : 0;
+
     // Kiểm tra xem sản phẩm này đã có trong giỏ chưa
     final existing =
         shoppingItems.firstWhereOrNull((item) => item.product.id == product.id);
 
     if (existing != null) {
-      existing.quantity++; // Có rồi thì tăng số lượng
+      existing.quantity += quantity; // Có rồi thì tăng số lượng
+      // Cập nhật lại discount nếu tổng quantity > 20
+      existing.discountPercentage = existing.quantity > 20 ? 15 : 0;
     } else {
       shoppingItems.add(
         ShoppingItem(
           product: product,
+          quantity: quantity,
           selectedOptions: options,
           notes: notes,
+          discountPercentage: discountPercentage,
         ),
       );
     }
@@ -133,10 +191,18 @@ class ShoppingController extends GetxController {
     }
   }
 
-  // 5. Tính tổng tiền
+  // 5. Tính tổng tiền (với giảm giá nếu có)
   void updateTotal() {
-    totalPrice.value = shoppingItems.fold(
-        0.0, (sum, item) => sum + item.product.price * item.quantity);
+    double total = 0.0;
+    for (var item in shoppingItems) {
+      double itemTotal = item.product.price * item.quantity;
+      // Áp dụng giảm giá nếu có
+      if (item.discountPercentage > 0) {
+        itemTotal = itemTotal * (1 - item.discountPercentage / 100);
+      }
+      total += itemTotal;
+    }
+    totalPrice.value = total;
   }
 
   // 6. Giảm số lượng (Nút trừ trong giỏ hàng)
@@ -145,6 +211,9 @@ class ShoppingController extends GetxController {
     if (index != -1) {
       if (shoppingItems[index].quantity > 1) {
         shoppingItems[index].quantity--; // Giảm 1
+        // Cập nhật discount nếu quantity <= 20
+        shoppingItems[index].discountPercentage =
+            shoppingItems[index].quantity > 20 ? 15 : 0;
       } else {
         shoppingItems.removeAt(index); // Hết số lượng thì xóa luôn
       }

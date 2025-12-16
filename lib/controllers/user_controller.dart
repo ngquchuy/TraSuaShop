@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -64,8 +65,8 @@ class UserController extends GetxController {
   }
 
   // ✅ Cập nhật thông tin hồ sơ (Lưu vào Firestore + GetStorage)
-  Future<bool> updateProfileInfo(
-      String name, String email, String avatar, String phone, String address) async {
+  Future<bool> updateProfileInfo(String name, String email, String avatar,
+      String phone, String address) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
@@ -73,17 +74,43 @@ class UserController extends GetxController {
         return false;
       }
 
+      // Validate số điện thoại
+      if (phone.isEmpty || phone.length < 10) {
+        print('DEBUG: Invalid phone number');
+        return false;
+      }
+
       print('DEBUG: Starting profile update...');
 
-      // Cập nhật tên hiển thị trên Firebase Auth
-      await user.updateDisplayName(name);
-      print('DEBUG: Updated display name');
+      // Cập nhật tên hiển thị trên Firebase Auth (với timeout)
+      try {
+        await user.updateDisplayName(name).timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            throw TimeoutException('Timeout updating display name');
+          },
+        );
+        print('DEBUG: Updated display name');
+      } catch (e) {
+        print('DEBUG: Error updating display name: $e');
+        return false;
+      }
 
-      // Cập nhật avatar URL trên Firebase Auth
-      await user.updatePhotoURL(avatar);
-      print('DEBUG: Updated photo URL');
+      // Cập nhật avatar URL trên Firebase Auth (với timeout)
+      try {
+        await user.updatePhotoURL(avatar).timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            throw TimeoutException('Timeout updating photo URL');
+          },
+        );
+        print('DEBUG: Updated photo URL');
+      } catch (e) {
+        print('DEBUG: Error updating photo URL: $e');
+        return false;
+      }
 
-      // Lưu dữ liệu vào Firestore
+      // Lưu dữ liệu vào Firestore (với timeout)
       try {
         await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
           'name': name,
@@ -91,10 +118,18 @@ class UserController extends GetxController {
           'phone': phone,
           'address': address,
           'avatar': avatar,
-        }, SetOptions(merge: true));
+          'updatedAt': DateTime.now(),
+        }, SetOptions(merge: true)).timeout(
+          const Duration(seconds: 15),
+          onTimeout: () {
+            throw TimeoutException('Timeout saving to Firestore');
+          },
+        );
         print('DEBUG: Saved to Firestore');
       } catch (e) {
-        print('DEBUG: Firestore error (will use local storage): $e');
+        print('DEBUG: Firestore error: $e');
+        // Nếu Firestore fail, vẫn lưu vào local storage
+        print('DEBUG: Using local storage as fallback');
       }
 
       // Lưu vào GetStorage làm backup

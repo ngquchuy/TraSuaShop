@@ -6,7 +6,7 @@ import 'package:milktea_shop/controllers/theme_controller.dart';
 import 'package:milktea_shop/controllers/user_controller.dart';
 import 'package:milktea_shop/features/help%20center/views/screen/help_center_screen.dart';
 import 'package:milktea_shop/features/shipping%20address/shipping_address_screen.dart';
-import 'package:milktea_shop/view/cart_screen.dart';
+import 'package:milktea_shop/view/shopping_screen.dart';
 import 'package:milktea_shop/view/edit_profile_screen.dart';
 import 'package:milktea_shop/view/order_history_screen.dart';
 import 'package:milktea_shop/view/signin_screen.dart';
@@ -83,7 +83,7 @@ class AccountScreen extends StatelessWidget {
                     icon: Icons.shopping_cart_outlined,
                     title: 'Đơn hàng của tôi',
                     subtitle: 'Xem trạng thái đơn hàng và chi tiết',
-                    onTap: () => Get.to(() => CartScreen()),
+                    onTap: () => Get.to(() => ShoppingScreen()),
                   ),
                   const Divider(height: 1),
                   _buildAccountItem(

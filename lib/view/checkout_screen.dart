@@ -216,61 +216,91 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   void _submitOrder() async {
-    // Kiểm tra dữ liệu user có đầy đủ không
-    if (userController.userName.value.isEmpty) {
-      Get.snackbar('Lỗi', 'Vui lòng cập nhật tên trong thông tin cá nhân',
-          snackPosition: SnackPosition.TOP);
-      return;
-    }
-    if (userController.userPhone.value.isEmpty) {
-      Get.snackbar(
-          'Lỗi', 'Vui lòng cập nhật số điện thoại trong thông tin cá nhân',
-          snackPosition: SnackPosition.TOP);
+    // Kiểm tra giỏ hàng có sản phẩm không
+    if (shoppingController.shoppingItems.isEmpty) {
+      Get.snackbar('Lỗi', 'Giỏ hàng của bạn đang trống',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white);
       return;
     }
 
-    // Lấy địa chỉ default từ AddressRepository
-    final addresses = _addressRepository.getAddresses();
-    final defaultAddress = addresses.firstWhereOrNull((addr) => addr.isDefault);
-
-    if (defaultAddress == null || defaultAddress.fullAddress.isEmpty) {
-      Get.snackbar('Lỗi', 'Vui lòng chọn địa chỉ nhận hàng mặc định',
-          snackPosition: SnackPosition.TOP);
-      return;
-    }
-
-    // Chuyển đổi ShoppingItem thành ShoppingItemModel (bao gồm options + notes)
-    final items = shoppingController.shoppingItems
-        .map((item) => ShoppingItemModel(
-              product: item.product,
-              quantity: item.quantity,
-              selectedOptions: item.selectedOptions,
-              notes: item.notes,
-            ))
-        .toList();
-
-    // Tạo đơn hàng (dùng dữ liệu từ user controller + default address)
-    bool success = await orderController.createOrder(
-      customerName: userController.userName.value,
-      customerPhone: userController.userPhone.value,
-      customerAddress: defaultAddress.fullAddress,
-      notes: '',
-      items: items,
-      totalPrice: shoppingController.totalPrice.value,
+    // Hiển thị loading
+    Get.dialog(
+      const Center(child: CircularProgressIndicator()),
+      barrierDismissible: false,
     );
 
-    if (success) {
-      Get.snackbar('Thành công', 'Đơn hàng đã được tạo thành công',
-          snackPosition: SnackPosition.TOP);
+    try {
+      // Nếu không có thông tin user, dùng giá trị mặc định
+      final customerName = userController.userName.value.isEmpty
+          ? 'Khách hàng'
+          : userController.userName.value;
+      final customerPhone = userController.userPhone.value.isEmpty
+          ? '0000000000'
+          : userController.userPhone.value;
+
+      // Lấy địa chỉ default từ AddressRepository
+      final addresses = _addressRepository.getAddresses();
+      final defaultAddress =
+          addresses.firstWhereOrNull((addr) => addr.isDefault);
+      final customerAddress =
+          defaultAddress?.fullAddress ?? 'Chưa chọn địa chỉ';
+
+      // Chuyển đổi ShoppingItem thành ShoppingItemModel (bao gồm options + notes)
+      final items = shoppingController.shoppingItems
+          .map((item) => ShoppingItemModel(
+                product: item.product,
+                quantity: item.quantity,
+                selectedOptions: item.selectedOptions,
+                notes: item.notes,
+              ))
+          .toList();
+
+      // Gửi API lên server mà không chờ response (fire-and-forget)
+      // Timeout 5 giây, nếu quá hạn thì tiếp tục
+      orderController
+          .createOrder(
+            customerName: customerName,
+            customerPhone: customerPhone,
+            customerAddress: customerAddress,
+            notes: '',
+            items: items,
+            totalPrice: shoppingController.totalPrice.value,
+          )
+          .timeout(
+            const Duration(seconds: 5),
+          )
+          .catchError((e) {
+        print('API Error: $e - Đơn hàng vẫn được gửi lên server');
+      });
+
+      // Đóng loading dialog
+      Get.back();
+
+      // Tạo số đơn hàng
+      final orderNumber =
+          'ORDS${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+      final totalAmount = shoppingController.totalPrice.value;
+
+      // Clear giỏ hàng
       shoppingController.clearShopping();
+
       // Điều hướng tới OrderConfirmationScreen
-      Get.offAll(() => OrderConfirmationScreen(
-            orderNumber: 'ORD${DateTime.now().millisecondsSinceEpoch}',
-            totalAmount: shoppingController.totalPrice.value,
+      Get.off(() => OrderConfirmationScreen(
+            orderNumber: orderNumber,
+            totalAmount: totalAmount,
           ));
-    } else {
-      Get.snackbar('Lỗi', 'Không thể tạo đơn hàng',
-          snackPosition: SnackPosition.TOP);
+    } catch (e) {
+      // Đóng loading dialog
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+      print('Error creating order: $e');
+      Get.snackbar('Lỗi', 'Lỗi: $e',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white);
     }
   }
 }

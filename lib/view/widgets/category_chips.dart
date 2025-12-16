@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:milktea_shop/controllers/shopping_controller.dart';
 import 'package:milktea_shop/utils/app_textstyles.dart';
 
 class CategoryChips extends StatefulWidget {
@@ -14,6 +16,8 @@ class _CategoryChipsState extends State<CategoryChips> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final shoppingController = Get.find<ShoppingController>();
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -44,6 +48,8 @@ class _CategoryChipsState extends State<CategoryChips> {
                   setState(() {
                     selectedIndex = selected ? index : selectedIndex;
                   });
+                  // Gọi hàm lọc theo danh mục
+                  shoppingController.filterByCategory(categories[index]);
                 },
                 selectedColor: Theme.of(context).primaryColor,
                 backgroundColor: isDark ? Colors.grey[800] : Colors.grey[100],

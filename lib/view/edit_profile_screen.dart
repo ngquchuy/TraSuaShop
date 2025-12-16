@@ -16,6 +16,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   late TextEditingController nameController;
   late TextEditingController emailController;
+  late TextEditingController phoneController;
   String? avatarPath;
 
   @override
@@ -24,22 +25,117 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     nameController = TextEditingController(text: userController.userName.value);
     emailController =
         TextEditingController(text: userController.userEmail.value);
+    phoneController =
+        TextEditingController(text: userController.userPhone.value);
     avatarPath = userController.avatarPath.value;
   }
 
-  //void _saveProfile() {
-  // if (_formKey.currentState!.validate()) {
-  //userController.updateUser(
-  //nameController.text.trim(),
-  //emailController.text.trim(),
-  //avatarPath!,
-  //);
-  //Get.back();
-  //Get.snackbar('Thành công', 'Cập nhật thông tin tài khoản thành công 🎉',
-  // snackPosition: SnackPosition.BOTTOM,
-  // duration: const Duration(seconds: 2));
-  // }
-  //}
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh values từ UserController khi vào lại screen
+    nameController.text = userController.userName.value;
+    emailController.text = userController.userEmail.value;
+    phoneController.text = userController.userPhone.value;
+    avatarPath = userController.avatarPath.value;
+  }
+
+  void _saveProfile() async {
+    if (_formKey.currentState!.validate()) {
+      // Validate số điện thoại thêm
+      if (phoneController.text.length < 10) {
+        Get.snackbar(
+          'Lỗi',
+          'Số điện thoại phải có ít nhất 10 chữ số',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      // Hiển thị loading dialog
+      Get.dialog(
+        const Center(
+          child: CircularProgressIndicator(),
+        ),
+        barrierDismissible: false,
+      );
+
+      try {
+        final success = await userController
+            .updateProfileInfo(
+          nameController.text.trim(),
+          emailController.text.trim(),
+          avatarPath ?? userController.avatarPath.value,
+          phoneController.text.trim(),
+          userController.userAddress.value,
+        )
+            .timeout(
+          const Duration(seconds: 30),
+          onTimeout: () {
+            Get.back(); // Đóng loading dialog
+            Get.snackbar(
+              'Lỗi',
+              'Cập nhật thông tin bị timeout. Vui lòng kiểm tra kết nối mạng và thử lại.',
+              snackPosition: SnackPosition.BOTTOM,
+              duration: const Duration(seconds: 3),
+              backgroundColor: Colors.red,
+              colorText: Colors.white,
+            );
+            return false;
+          },
+        );
+
+        // Đóng loading dialog
+        if (Get.isDialogOpen ?? false) {
+          Get.back();
+        }
+
+        if (success) {
+          Get.back();
+          Get.snackbar(
+            'Thành công',
+            'Cập nhật thông tin tài khoản thành công 🎉',
+            snackPosition: SnackPosition.BOTTOM,
+            duration: const Duration(seconds: 2),
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+          );
+        } else {
+          Get.snackbar(
+            'Lỗi',
+            'Không thể cập nhật thông tin. Vui lòng kiểm tra::\n- Kết nối mạng\n- Định dạng số điện thoại\n- Thông tin email',
+            snackPosition: SnackPosition.BOTTOM,
+            duration: const Duration(seconds: 3),
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
+      } catch (e) {
+        // Đóng loading dialog
+        if (Get.isDialogOpen ?? false) {
+          Get.back();
+        }
+        Get.snackbar(
+          'Lỗi',
+          'Lỗi: ${e.toString()}\n\nVui lòng thử lại hoặc liên hệ hỗ trợ.',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 3),
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +156,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   backgroundImage: avatarPath != null
                       ? (avatarPath!.startsWith('assets/')
                           ? AssetImage(avatarPath!) as ImageProvider
-                          : FileImage(File(avatarPath!)))
+                          : (avatarPath!.startsWith('http')
+                              ? NetworkImage(avatarPath!) as ImageProvider
+                              : FileImage(File(avatarPath!))))
                       : const AssetImage(
                           'assets/images/avatar-with-black-hair-and-hoodie.png'),
                   child: Align(
@@ -105,17 +203,42 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ? 'Email không hợp lệ'
                     : null,
               ),
+              const SizedBox(height: 16),
+
+              // Số điện thoại
+              TextFormField(
+                controller: phoneController,
+                decoration: const InputDecoration(
+                  labelText: 'Số điện thoại',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.phone_outlined),
+                  hintText: '0xxxxxxxxx',
+                ),
+                keyboardType: TextInputType.phone,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Vui lòng nhập số điện thoại';
+                  }
+                  if (value.length < 10 || value.length > 11) {
+                    return 'Số điện thoại phải có 10-11 chữ số';
+                  }
+                  if (!RegExp(r'^0\d{9,10}$').hasMatch(value)) {
+                    return 'Số điện thoại phải bắt đầu bằng 0 và là chữ số';
+                  }
+                  return null;
+                },
+              ),
               const SizedBox(height: 24),
 
               // Nút lưu
               SizedBox(
                 width: double.infinity,
-                //child: ElevatedButton.icon(
-                //icon: const Icon(Icons.save),
-                //label: const Text('Lưu thay đổi'),
-                //onPressed: _saveProfile,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.save),
+                  label: const Text('Lưu thay đổi'),
+                  onPressed: _saveProfile,
+                ),
               ),
-              // ),
             ],
           ),
         ),

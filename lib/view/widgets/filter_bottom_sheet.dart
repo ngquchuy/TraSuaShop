@@ -59,6 +59,8 @@ class FilterBottomSheet {
                       decoration: InputDecoration(
                         hintText: 'Thấp',
                         suffixText: 'đ',
+                        prefixIcon: Icon(Icons.attach_money,
+                            color: Theme.of(context).primaryColor),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
@@ -66,23 +68,37 @@ class FilterBottomSheet {
                                 isDark ? Colors.grey[700]! : Colors.grey[300]!,
                           ),
                         ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).primaryColor,
+                            width: 2,
+                          ),
+                        ),
                       ),
                       keyboardType: TextInputType.number,
                     ),
                   ),
-                  const SizedBox(
-                    width: 16,
-                  ),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: TextField(
                       decoration: InputDecoration(
                         hintText: 'Cao',
                         suffixText: 'đ',
+                        prefixIcon: Icon(Icons.attach_money,
+                            color: Theme.of(context).primaryColor),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
                             color:
                                 isDark ? Colors.grey[700]! : Colors.grey[300]!,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).primaryColor,
+                            width: 2,
                           ),
                         ),
                       ),

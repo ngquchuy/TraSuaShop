@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:milktea_shop/models/item_option.dart';
+import 'package:milktea_shop/utils/number_formatter.dart';
 
 class OptionGroups extends StatefulWidget {
   final OptionGroup optionGroups;
@@ -111,7 +112,7 @@ class _OptionGroupsState extends State<OptionGroups> {
               ...List.generate(group.options.length, (optionIndex) {
                 final option = group.options[optionIndex];
                 final priceText = option.price > 0
-                    ? ' (+${option.price.toStringAsFixed(0)}đ)'
+                    ? ' (+${NumberFormatter.formatCurrency(option.price)}đ)'
                     : '';
 
                 if (group.isSingleChoice) {

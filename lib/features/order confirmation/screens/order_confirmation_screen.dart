@@ -2,13 +2,46 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:milktea_shop/utils/app_textstyles.dart';
+import 'package:milktea_shop/utils/number_formatter.dart';
 import 'package:milktea_shop/view/main_screen.dart';
 
-class OrderConfirmationScreen extends StatelessWidget {
+class OrderConfirmationScreen extends StatefulWidget {
   final String orderNumber;
   final double totalAmount;
   const OrderConfirmationScreen(
       {super.key, required this.orderNumber, required this.totalAmount});
+
+  @override
+  State<OrderConfirmationScreen> createState() =>
+      _OrderConfirmationScreenState();
+}
+
+class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Hiển thị thông báo thanh toán thành công khi vào màn hình
+    Future.delayed(const Duration(milliseconds: 500), () {
+      Get.snackbar(
+        '✓ Thanh toán thành công',
+        'Đơn hàng #${widget.orderNumber} - Tổng: ${NumberFormatter.formatPrice(widget.totalAmount)}',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 4),
+        margin: const EdgeInsets.all(12),
+        borderRadius: 12,
+        boxShadows: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          )
+        ],
+        icon: const Icon(Icons.check_circle, color: Colors.white),
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +49,7 @@ class OrderConfirmationScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -41,7 +74,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                 height: 16,
               ),
               Text(
-                'Đơn hàng #$orderNumber đã được hoàn thành',
+                'Đơn hàng #${widget.orderNumber} đã được hoàn thành',
                 textAlign: TextAlign.center,
                 style: AppTextstyles.withColor(
                   AppTextstyles.bodyLarge,
@@ -49,10 +82,24 @@ class OrderConfirmationScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(
+                height: 8,
+              ),
+              Text(
+                'Tổng tiền: ${NumberFormatter.formatPrice(widget.totalAmount)}',
+                textAlign: TextAlign.center,
+                style: AppTextstyles.withColor(
+                  AppTextstyles.bodyLarge,
+                  Colors.green,
+                ),
+              ),
+              const SizedBox(
                 height: 48,
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  // Đi đến trang lịch sử đơn hàng
+                  Get.back();
+                },
                 style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor,
                     padding: const EdgeInsets.symmetric(

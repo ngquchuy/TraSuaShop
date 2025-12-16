@@ -4,7 +4,7 @@ import 'package:milktea_shop/controllers/notification_controller.dart';
 import 'package:milktea_shop/controllers/theme_controller.dart';
 import 'package:milktea_shop/controllers/shopping_controller.dart'; // Import Controller
 import 'package:milktea_shop/view/all_product_screen.dart';
-import 'package:milktea_shop/view/cart_screen.dart';
+import 'package:milktea_shop/view/shopping_screen.dart';
 import 'package:milktea_shop/view/widgets/category_chips.dart';
 import 'package:milktea_shop/view/widgets/custom_searchbar.dart';
 import 'package:milktea_shop/view/widgets/product_grid.dart';
@@ -18,7 +18,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Khởi tạo các Controller cần thiết
     final notificationController = Get.find<NotificationController>();
-    
+
     // QUAN TRỌNG: Khởi tạo ShoppingController để bắt đầu tải API
     final shoppingController = Get.put(ShoppingController());
 
@@ -34,7 +34,8 @@ class HomeScreen extends StatelessWidget {
             children: [
               // 👤 Header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
                     const CircleAvatar(
@@ -97,7 +98,7 @@ class HomeScreen extends StatelessWidget {
 
                     // 🛒 Nút giỏ hàng
                     IconButton(
-                      onPressed: () => Get.to(() => CartScreen()),
+                      onPressed: () => Get.to(() => ShoppingScreen()),
                       icon: const Icon(Icons.shopping_cart_outlined),
                     ),
 
@@ -115,7 +116,7 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               // 🔍 Search bar & Banner & Chips
               // Bọc trong SingleChildScrollView hoặc giữ nguyên nếu ProductGrid là Expanded
               // Ở đây mình giữ nguyên cấu trúc của bạn

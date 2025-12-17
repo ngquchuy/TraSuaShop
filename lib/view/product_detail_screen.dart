@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:milktea_shop/controllers/shopping_controller.dart';
 import 'package:milktea_shop/controllers/wish_list_controller.dart'; // Import WishListController
+import 'package:milktea_shop/controllers/notification_controller.dart';
 import 'package:milktea_shop/models/item_option.dart';
 import 'package:milktea_shop/models/product.dart';
 import 'package:milktea_shop/utils/app_textstyles.dart';
@@ -21,9 +22,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   late List<OptionGroup> _optionGroups;
   int _quantity = 1;
   late TextEditingController _noteController;
+  bool _discountNotified = false; // Flag để theo dõi đã thông báo discount chưa
 
   // Gọi các Controller cần thiết
   final ShoppingController shoppingController = Get.find<ShoppingController>();
+  final NotificationController notificationController =
+      Get.put(NotificationController());
   // Khởi tạo WishListController (nếu chưa có thì Get.put, nếu có rồi thì Get.find)
   // Ở đây dùng Get.put để đảm bảo nó tồn tại nếu người dùng vào thẳng trang chi tiết
   final WishListController wishListController = Get.put(WishListController());
@@ -112,26 +116,46 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return basePrice + optionPrice;
   }
 
-  // Hàm tính tổng giá với giảm giá nếu số lượng > 20
+  // Hàm tính tổng giá với giảm giá nếu số lượng >= 10
   double _calculateFinalTotal() {
     double pricePerUnit = _calculateTotalPrice();
     double total = pricePerUnit * _quantity;
 
-    // Áp dụng giảm giá 15% nếu số lượng > 20
-    if (_quantity > 20) {
+    // Áp dụng giảm giá 15% nếu số lượng >= 10
+    if (_quantity >= 10) {
       total = total * 0.85; // Giảm 15%
     }
     return total;
   }
 
   void _updateQuantity(int newQuantity) {
+    // Giới hạn tối đa 19, cảnh báo nếu cố tăng tới 20 hoặc hơn
+    if (newQuantity > 20) {
+      Get.snackbar(
+        'Giới hạn số lượng',
+        'Tối đa chỉ có thể mua 20 ly',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 1),
+        margin: const EdgeInsets.all(12),
+        borderRadius: 12,
+      );
+      return; // Không cho tăng số lượng
+    }
+
     if (newQuantity >= 1) {
       setState(() {
         _quantity = newQuantity;
+        // Reset flag discount nếu số lượng < 10
+        if (newQuantity < 10) {
+          _discountNotified = false;
+        }
       });
 
-      // Hiển thị thông báo giảm giá nếu số lượng > 20
-      if (newQuantity > 20) {
+      // Hiển thị thông báo giảm giá chỉ 1 lần nếu số lượng >= 10
+      if (newQuantity >= 10 && !_discountNotified) {
+        _discountNotified = true;
         Get.snackbar(
           'Ưu đãi đặc biệt!',
           'Bạn sẽ được giảm 15% cho đơn hàng này',
@@ -309,6 +333,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 // Gọi hàm toggleFavorite từ WishListController
                                 wishListController
                                     .toggleFavorite(widget.product);
+
+                                // Kiểm tra trạng thái sau khi toggle
+                                bool isFavNow = wishListController
+                                    .isFavorite(widget.product);
+                                if (isFavNow) {
+                                  notificationController.addNotification(
+                                    'Đã thêm ${widget.product.name} vào danh sách yêu thích',
+                                  );
+                                } else {
+                                  notificationController.addNotification(
+                                    'Đã bỏ ${widget.product.name} khỏi danh sách yêu thích',
+                                  );
+                                }
                               },
                               icon: Icon(
                                 isFav ? Icons.favorite : Icons.favorite_border,
@@ -472,7 +509,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     double pricePerUnit = _calculateTotalPrice();
     double currentTotal = _calculateFinalTotal();
     double discountAmount =
-        (_quantity > 20) ? (pricePerUnit * _quantity * 0.15) : 0;
+        (_quantity >= 10) ? (pricePerUnit * _quantity * 0.15) : 0;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -496,7 +533,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (_quantity > 20) ...[
+                    if (_quantity >= 10) ...[
                       const Text('Tổng (gốc):'),
                       Text(
                         NumberFormatter.formatPrice(pricePerUnit * _quantity),
@@ -509,7 +546,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ],
                     const Text('Tổng cộng:'),
                     Text(
-                      'Giảm ${_quantity > 20 ? '15%' : '0%'}: -${NumberFormatter.formatPrice(discountAmount)}',
+                      'Giảm ${_quantity >= 10 ? '15%' : '0%'}: -${NumberFormatter.formatPrice(discountAmount)}',
                       style: TextStyle(
                         fontSize: 14,
                         color: discountAmount > 0 ? Colors.green : Colors.grey,
@@ -607,6 +644,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         options: _optionGroups,
         notes: _noteController.text.trim(),
         quantity: _quantity,
+      );
+
+      // Thêm thông báo vào NotificationController
+      notificationController.addNotification(
+        'Đã thêm ${widget.product.name} × $_quantity vào giỏ',
       );
 
       // Hiển thị thông báo thành công

@@ -194,7 +194,7 @@ class ShoppingScreen extends StatelessWidget {
                       )),
                   ElevatedButton.icon(
                     onPressed: () {
-                      //Get.to(() => const CheckoutScreen());
+                      Get.to(() => const CheckoutScreen());
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,

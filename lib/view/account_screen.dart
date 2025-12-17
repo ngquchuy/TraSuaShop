@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:milktea_shop/controllers/theme_controller.dart';
 import 'package:milktea_shop/controllers/user_controller.dart';
+import 'package:milktea_shop/controllers/notification_controller.dart';
 import 'package:milktea_shop/services/auth_service.dart';
 import 'package:milktea_shop/view/signin_screen.dart';
-import 'package:milktea_shop/features/help%20center/views/screen/help_center_screen.dart';
 import 'package:milktea_shop/features/shipping%20address/shipping_address_screen.dart';
-import 'package:milktea_shop/view/main_screen.dart';
 import 'package:milktea_shop/view/shopping_screen.dart';
 import 'package:milktea_shop/view/wish_list_screen.dart';
 
@@ -18,6 +17,7 @@ class AccountScreen extends StatelessWidget {
     // Gọi các controller
     final themeController = Get.find<ThemeController>();
     final userController = Get.find<UserController>();
+    final notificationController = Get.put(NotificationController());
     final AuthService _authService = AuthService();
 
     return Scaffold(
@@ -167,7 +167,11 @@ class AccountScreen extends StatelessWidget {
                             // 2. Reset dữ liệu trong UserController về mặc định
                             userController.clearData();
 
-                            // 3. Quay về màn hình đăng nhập & xóa lịch sử
+                            // 3. Thêm thông báo đăng xuất thành công
+                            notificationController
+                                .addNotification('Đã đăng xuất thành công!');
+
+                            // 4. Quay về màn hình đăng nhập & xóa lịch sử
                             Get.offAll(() => SigninScreen());
 
                             Get.snackbar('Thành công', 'Đã đăng xuất an toàn.');

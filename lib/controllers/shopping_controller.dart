@@ -158,8 +158,8 @@ class ShoppingController extends GetxController {
       {List<OptionGroup> options = const [],
       String notes = '',
       int quantity = 1}) {
-    // Tính phần trăm giảm giá (15% nếu quantity > 20)
-    double discountPercentage = quantity > 20 ? 15 : 0;
+    // Tính phần trăm giảm giá (15% nếu quantity >= 10)
+    double discountPercentage = quantity >= 10 ? 15 : 0;
 
     // Kiểm tra xem sản phẩm này đã có trong giỏ chưa
     final existing =
@@ -167,8 +167,8 @@ class ShoppingController extends GetxController {
 
     if (existing != null) {
       existing.quantity += quantity; // Có rồi thì tăng số lượng
-      // Cập nhật lại discount nếu tổng quantity > 20
-      existing.discountPercentage = existing.quantity > 20 ? 15 : 0;
+      // Cập nhật lại discount nếu tổng quantity >= 10
+      existing.discountPercentage = existing.quantity >= 10 ? 15 : 0;
     } else {
       shoppingItems.add(
         ShoppingItem(
@@ -195,7 +195,20 @@ class ShoppingController extends GetxController {
   void updateTotal() {
     double total = 0.0;
     for (var item in shoppingItems) {
-      double itemTotal = item.product.price * item.quantity;
+      // Tính giá option
+      double optionPrice = 0.0;
+      for (var group in item.selectedOptions) {
+        for (var option in group.options) {
+          if (option.isSelected) {
+            optionPrice += option.price;
+          }
+        }
+      }
+
+      // Tính giá từng sản phẩm (product + options) × quantity
+      double pricePerUnit = item.product.price + optionPrice;
+      double itemTotal = pricePerUnit * item.quantity;
+
       // Áp dụng giảm giá nếu có
       if (item.discountPercentage > 0) {
         itemTotal = itemTotal * (1 - item.discountPercentage / 100);
@@ -211,9 +224,9 @@ class ShoppingController extends GetxController {
     if (index != -1) {
       if (shoppingItems[index].quantity > 1) {
         shoppingItems[index].quantity--; // Giảm 1
-        // Cập nhật discount nếu quantity <= 20
+        // Cập nhật discount nếu quantity < 10
         shoppingItems[index].discountPercentage =
-            shoppingItems[index].quantity > 20 ? 15 : 0;
+            shoppingItems[index].quantity >= 10 ? 15 : 0;
       } else {
         shoppingItems.removeAt(index); // Hết số lượng thì xóa luôn
       }

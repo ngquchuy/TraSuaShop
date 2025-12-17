@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:milktea_shop/controllers/auth_controller.dart';
+import 'package:milktea_shop/controllers/notification_controller.dart';
 import 'package:milktea_shop/utils/app_textstyles.dart';
 import 'package:milktea_shop/view/forgot_password_screen.dart';
 import 'package:milktea_shop/view/main_screen.dart';
@@ -18,6 +19,8 @@ class SigninScreen extends StatelessWidget {
   final TextEditingController _passwordController = TextEditingController();
   // Khởi tạo AuthController để sử dụng cho cả email/pass và Google
   final AuthController authController = Get.find<AuthController>();
+  final NotificationController notificationController =
+      Get.put(NotificationController());
   final AuthService _authService = AuthService();
 
   @override
@@ -52,6 +55,9 @@ class SigninScreen extends StatelessWidget {
 
         final userController = Get.find<UserController>();
         userController.setUserData(result);
+
+        // Thêm thông báo đăng nhập thành công
+        notificationController.addNotification('Đăng nhập thành công!');
 
         if (!context.mounted) return;
 
@@ -278,6 +284,9 @@ class SigninScreen extends StatelessWidget {
 
     // 2. Nếu thành công, chuyển hướng
     if (user != null) {
+      // Thêm thông báo đăng nhập Google thành công
+      notificationController
+          .addNotification('Đăng nhập với Google thành công!');
       Get.offAll(() => const MainScreen());
     } else {
       // Xử lý thất bại (ví dụ: hiển thị snackbar báo lỗi)

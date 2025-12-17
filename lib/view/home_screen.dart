@@ -59,7 +59,7 @@ class HomeScreen extends StatelessWidget {
 
                     // 🔔 Thanh thông báo
                     Obx(() {
-                      int count = notificationController.count;
+                      int count = notificationController.unreadCount.value;
                       return Stack(
                         clipBehavior: Clip.none,
                         children: [

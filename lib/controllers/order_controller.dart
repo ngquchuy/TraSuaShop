@@ -67,7 +67,7 @@ class OrderController extends GetxController {
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         print('DEBUG: Order created successfully!');
-        
+
         // Lưu đơn hàng vào Firestore
         await _saveOrderToFirestore(
           customerName: customerName,
@@ -77,7 +77,7 @@ class OrderController extends GetxController {
           totalPrice: totalPrice,
           notes: notes,
         );
-        
+
         return true;
       } else {
         print(
@@ -195,7 +195,7 @@ class OrderController extends GetxController {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs
-            .map((doc) => OrderModel.fromJson(doc.data() as Map<String, dynamic>))
+            .map((doc) => OrderModel.fromJson(doc.data()))
             .toList());
   }
 }

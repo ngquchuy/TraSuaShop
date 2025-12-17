@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 
 class NotificationController extends GetxController {
   final notifications = <String>[].obs;
+  final unreadCount = 0.obs;
 
   final dbRef = FirebaseDatabase.instance.ref('notifications');
 
@@ -18,27 +19,37 @@ class NotificationController extends GetxController {
       } else {
         final list = List<String>.from(data as List);
         notifications.assignAll(list);
+        // Cập nhật unread count bằng số notification mới nhất
+        unreadCount.value = list.length;
       }
     });
   }
 
   // add
   Future<void> addNotification(String message) async {
-    notifications.add(message);
+    notifications.insert(0, message); // Insert vào đầu danh sách
+    unreadCount.value = notifications.length;
     await dbRef.set(notifications); // update toàn bộ list lên firebase
   }
 
   // remove 1 cái
   Future<void> removeNotification(int index) async {
     notifications.removeAt(index);
+    unreadCount.value = notifications.length;
     await dbRef.set(notifications);
   }
 
   // clear hết
   Future<void> clearAll() async {
     notifications.clear();
+    unreadCount.value = 0;
     await dbRef.set([]);
   }
 
-  int get count => notifications.length;
+  // Mark all as read (xóa badge)
+  void markAllAsRead() {
+    unreadCount.value = 0;
+  }
+
+  int get count => unreadCount.value;
 }

@@ -2,10 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:milktea_shop/controllers/notification_controller.dart';
 
-class NotificationScreen extends StatelessWidget {
-  NotificationScreen({super.key});
+class NotificationScreen extends StatefulWidget {
+  const NotificationScreen({super.key});
 
+  @override
+  State<NotificationScreen> createState() => _NotificationScreenState();
+}
+
+class _NotificationScreenState extends State<NotificationScreen> {
   final NotificationController controller = Get.find();
+
+  @override
+  void initState() {
+    super.initState();
+    // Mark all as read sau khi build hoàn tất
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.markAllAsRead();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

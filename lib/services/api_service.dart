@@ -9,7 +9,7 @@ class ApiService {
   static Future<List<Product>> fetchProducts() async {
     print("\n================ BẮT ĐẦU GỌI API ================");
     // 1. Check đường dẫn
-    final String url = '$baseUrl/products'; // Hoặc '$baseUrl/products/get-all' tùy backend
+    final String url = '$baseUrl/products'; 
     print("1. Đang gọi tới URL: $url");
 
     try {

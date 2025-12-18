@@ -1,7 +1,30 @@
-import 'package:milktea_shop/models/item_option.dart';
+// lib/models/product.dart
+
+class ProductTopping {
+  final String name;
+  final double price;
+
+  ProductTopping({required this.name, required this.price});
+
+  // Map từ JSON (Server -> App)
+  factory ProductTopping.fromJson(Map<String, dynamic> json) {
+    return ProductTopping(
+      name: json['name'] ?? '',
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+
+  // Map sang JSON (App -> Server)
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'price': price,
+    };
+  }
+}
 
 class Product {
-  final String id; // Đổi thành String để khớp với _id của MongoDB
+  final String id;
   final String name;
   final String category;
   final double price;
@@ -11,7 +34,10 @@ class Product {
   final String descriptions;
   final int soldCount;
   final double rating;
-  final List<OptionGroup> optionGroups;
+  final bool isAvailable;
+
+  // Danh sách Topping đi kèm món này
+  final List<ProductTopping> toppings;
 
   const Product({
     required this.id,
@@ -24,34 +50,41 @@ class Product {
     required this.descriptions,
     this.soldCount = 0,
     this.rating = 0.0,
-    this.optionGroups = const [],
+    this.isAvailable = true,
+    this.toppings = const [], // Mặc định rỗng
   });
 
-  // --- QUAN TRỌNG: Hàm chuyển đổi JSON từ Server thành Object ---
   factory Product.fromJson(Map<String, dynamic> json) {
-    return Product(
-      id: json['_id'] ?? '', // MongoDB trả về _id
-      name: json['name'] ?? 'Chưa có tên',
-      category: json['category'] ?? 'Trà sữa',
-      
-      // Xử lý giá: Server có thể trả về int hoặc double
-      price: (json['price'] as num?)?.toDouble() ?? 0.0,
-      
-      // Xử lý giá cũ (nếu có)
-      oldPrice: (json['oldPrice'] as num?)?.toDouble(),
+    // Parse mảng availableToppings từ backend
+    var toppingsList = json['availableToppings'] as List<dynamic>?;
+    List<ProductTopping> parsedToppings = toppingsList != null
+        ? toppingsList.map((t) => ProductTopping.fromJson(t)).toList()
+        : [];
 
-      // Xử lý ảnh: Nếu null thì để chuỗi rỗng (UI sẽ xử lý placeholder sau)
-      imageUrl: json['image'] ?? '', 
-      
-      isFavorite: json['isFavorite'] ?? false,
-      descriptions: json['description'] ?? '', // Backend bạn đang để là 'description'
-      
+    return Product(
+      id: json['_id'] ?? '',
+      name: json['name'] ?? 'Chưa có tên',
+      category: json['category'] ?? 'Trà Sữa',
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      oldPrice: (json['oldPrice'] as num?)?.toDouble(),
+      imageUrl: json['image'] ?? '',
+      descriptions: json['description'] ?? '',
       soldCount: json['soldCount'] ?? 0,
       rating: (json['rating'] as num?)?.toDouble() ?? 5.0,
-
-      // Tạm thời để rỗng vì API hiện tại chưa trả về OptionGroup (Size, Topping)
-      // Khi nào Backend làm phần Topping, ta sẽ cập nhật dòng này sau.
-      optionGroups: [], 
+      isAvailable: json['isAvailable'] ?? true,
+      toppings: parsedToppings,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'price': price,
+      'image': imageUrl,
+      'description': descriptions,
+      'category': category,
+      'isAvailable': isAvailable,
+      'availableToppings': toppings.map((t) => t.toJson()).toList(),
+    };
   }
 }

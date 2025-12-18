@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:milktea_shop/controllers/auth_controller.dart';
@@ -8,15 +7,18 @@ import 'package:milktea_shop/view/main_screen.dart';
 import 'package:milktea_shop/view/signup_screen.dart';
 import 'package:milktea_shop/view/widgets/custom_textfield.dart';
 import '../controllers/user_controller.dart';
+import '../models/user_model.dart';
 import '../services/auth_service.dart';
 import 'package:logger/logger.dart';
 
 class SigninScreen extends StatelessWidget {
-  SigninScreen({super.key});
+  // 1. Đã xóa biến isUser ở đây vì không cần thiết khi mới vào màn hình đăng nhập
+  SigninScreen({
+    super.key,
+  });
 
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  // Khởi tạo AuthController để sử dụng cho cả email/pass và Google
   final AuthController authController = Get.find<AuthController>();
   final AuthService _authService = AuthService();
 
@@ -32,34 +34,32 @@ class SigninScreen extends StatelessWidget {
       String username = _usernameController.text;
       String password = _passwordController.text;
 
-      // Log thông báo bắt đầu xử lý (Optional - để debug luồng chạy)
       logger.d("Bắt đầu xử lý đăng nhập cho: $username");
 
-      // Gọi API
+      // Gọi API Backend
       var result = await _authService.login(username, password);
 
       if (result != null) {
-        // Đăng nhập thành công
-        // 3. Thay thế print bằng logger.i (Info)
         logger.i("Đăng nhập thành công. Token: ${result['token']}");
 
-        //Lưu token vào bộ nhớ máy
-        String token =
-            result['token']; // Đảm bảo backend trả về key tên là 'token'
-
-        // Lưu token vào bộ nhớ máy an toàn
+        String token = result['token'];
         await _authService.saveToken(token);
 
         final userController = Get.find<UserController>();
+
+        // Cập nhật dữ liệu user vào Controller
         userController.setUserData(result);
 
         if (!context.mounted) return;
 
-        // Chuyển sang trang Dashboard
-        Get.offAll(() => const MainScreen());
+        // 2. Lấy thông tin User từ kết quả trả về hoặc từ Controller để chuyển trang
+        // Giả sử result chứa thông tin user, ta tạo đối tượng User từ đó
+        User loggedInUser = User.fromJson(result);
+
+        // Chuyển sang trang Dashboard và truyền user vào
+        Get.offAll(() => MainScreen(user: loggedInUser));
       } else {
-        // 4. Thêm log cảnh báo (Warning) khi đăng nhập thất bại
-        logger.w("Đăng nhập thất bại: Tên đăng nhập hoặc mật khẩu không đúng");
+        logger.w("Đăng nhập thất bại");
 
         if (!context.mounted) return;
 
@@ -104,9 +104,6 @@ class SigninScreen extends StatelessWidget {
                   if (value == null || value.isEmpty) {
                     return 'Vui lòng nhập tên đăng nhập của bạn';
                   }
-                  if (!GetUtils.isEmail(value)) {
-                    return 'Tên đăng nhập của bạn không hợp lệ';
-                  }
                   return null;
                 },
               ),
@@ -122,16 +119,14 @@ class SigninScreen extends StatelessWidget {
                   if (value == null || value.isEmpty) {
                     return 'Vui lòng nhập mật khẩu của bạn';
                   }
-
                   return null;
                 },
               ),
               const SizedBox(height: 8),
-              //forgot password textbutton
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () => Get.to(() => ForgotPasswordScreen()),
+                  onPressed: () => Get.to(() => const ForgotPasswordScreen()),
                   child: Text(
                     'Quên mật khẩu?',
                     style: AppTextstyles.withColor(
@@ -142,11 +137,11 @@ class SigninScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              //sign in button (Email/Password)
+              // Nút Đăng nhập
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                    onPressed: () => _handleLogin(), // Cập nhật cách gọi
+                    onPressed: () => _handleLogin(),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -161,7 +156,7 @@ class SigninScreen extends StatelessWidget {
                     )),
               ),
               const SizedBox(height: 24),
-              //sign up textbutton
+              // Sign up
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -185,8 +180,8 @@ class SigninScreen extends StatelessWidget {
                 ],
               ),
               const Divider(
-                thickness: 1, // Độ dày của đường kẻ
-                endIndent: 10, // Khoảng cách tới chữ
+                thickness: 1,
+                endIndent: 10,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -204,7 +199,8 @@ class SigninScreen extends StatelessWidget {
               const SizedBox(
                 height: 16,
               ),
-              // NÚT ĐĂNG NHẬP BẰNG GOOGLE (MỚI)
+
+              // NÚT GOOGLE
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -235,35 +231,47 @@ class SigninScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              // NÚT ĐĂNG NHẬP NHƯ KHÁCH (Đã có)
-              ElevatedButton(
-                onPressed: () async {
-                  await FirebaseAuth.instance.signInAnonymously();
-                  Get.offAll(() => const MainScreen());
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey.shade200,
-                  foregroundColor: Colors.black87,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: Colors.grey.shade400, width: 1),
-                  ),
-                  minimumSize: const Size(double.infinity, 50),
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  textStyle: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                child: Text(
-                  'Đăng nhập như khách',
-                  style: AppTextstyles.withColor(
-                    AppTextstyles.buttonMedium,
-                    Colors.black87,
-                  ),
-                ),
-              ),
+
+              // NÚT KHÁCH
+              // ElevatedButton(
+              //   onPressed: () async {
+              //     // 3. Tạo User ảo cho chế độ khách
+              //     // Lưu ý: Bạn hãy điền các trường required trong User model của bạn vào đây
+              //     User guestUser = User(
+              //       id: "guest",
+              //       fullName: "Khách hàng",
+              //       email: "",
+              //       phoneNumber: "",
+              //       address: "",
+              //       isAdmin: false,
+              //       // thêm các trường khác nếu Model User của bạn yêu cầu
+              //     );
+
+              //     Get.offAll(() => MainScreen(user: guestUser));
+              //   },
+              //   style: ElevatedButton.styleFrom(
+              //     backgroundColor: Colors.grey.shade200,
+              //     foregroundColor: Colors.black87,
+              //     elevation: 0,
+              //     shape: RoundedRectangleBorder(
+              //       borderRadius: BorderRadius.circular(12),
+              //       side: BorderSide(color: Colors.grey.shade400, width: 1),
+              //     ),
+              //     minimumSize: const Size(double.infinity, 50),
+              //     padding: const EdgeInsets.symmetric(vertical: 15),
+              //     textStyle: const TextStyle(
+              //       fontSize: 16,
+              //       fontWeight: FontWeight.bold,
+              //     ),
+              //   ),
+              //   child: Text(
+              //     'Đăng nhập như khách',
+              //     style: AppTextstyles.withColor(
+              //       AppTextstyles.buttonMedium,
+              //       Colors.black87,
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         ),
@@ -271,23 +279,13 @@ class SigninScreen extends StatelessWidget {
     );
   }
 
-  // Hàm xử lý Đăng nhập bằng Google (MỚI)
   void _handleGoogleSignIn(BuildContext context) async {
-    // 1. Gọi hàm signInWithGoogle() từ AuthController
-    final User? user = await authController.signInWithGoogle();
-
-    // 2. Nếu thành công, chuyển hướng
-    if (user != null) {
-      Get.offAll(() => const MainScreen());
-    } else {
-      // Xử lý thất bại (ví dụ: hiển thị snackbar báo lỗi)
-      Get.snackbar(
-        'Lỗi Đăng nhập',
-        'Không thể đăng nhập bằng Google. Vui lòng thử lại.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    }
+    Get.snackbar(
+      'Thông báo',
+      'Tính năng đăng nhập Google đang được cập nhật cho hệ thống mới.',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.orange,
+      colorText: Colors.white,
+    );
   }
 }

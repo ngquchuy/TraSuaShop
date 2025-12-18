@@ -17,7 +17,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Khởi tạo các Controller cần thiết
-    final notificationController = Get.find<NotificationController>();
+    // final notificationController = Get.find<NotificationController>();
 
     // QUAN TRỌNG: Khởi tạo ShoppingController để bắt đầu tải API
     final shoppingController = Get.put(ShoppingController());
@@ -59,13 +59,15 @@ class HomeScreen extends StatelessWidget {
 
                     // 🔔 Thanh thông báo
                     Obx(() {
-                      int count = notificationController.count;
+                      int count = 0; // notificationController.count;
+
                       return Stack(
                         clipBehavior: Clip.none,
                         children: [
                           IconButton(
                             icon: const Icon(Icons.notifications_outlined),
-                            onPressed: () => Get.to(() => NotificationScreen()),
+                            onPressed: () => {},
+                            // Get.to(() => NotificationScreen()),
                           ),
                           if (count > 0)
                             Positioned(

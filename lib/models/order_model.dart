@@ -21,27 +21,39 @@ class OrderModel {
     this.notes = '',
   });
 
-  // Chuyển đổi từ JSON (từ Firestore)
+  // --- PHẦN QUAN TRỌNG NHẤT: MAP DỮ LIỆU TỪ SERVER ---
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
-      id: json['id'] ?? '',
-      customerName: json['customerName'] ?? '',
-      customerPhone: json['customerPhone'] ?? '',
-      customerAddress: json['customerAddress'] ?? '',
+      // 1. Map '_id' của MongoDB sang 'id' của Flutter
+      id: json['_id'] ?? json['id'] ?? '',
+
+      customerName: json['customerName'] ?? 'Khách lẻ',
+
+      // 2. Map field 'phone' từ Backend sang 'customerPhone'
+      customerPhone: json['phone'] ?? json['customerPhone'] ?? '',
+
+      // 3. Map field 'address' từ Backend sang 'customerAddress'
+      customerAddress: json['address'] ?? json['customerAddress'] ?? '',
+
       items: (json['items'] as List<dynamic>?)
               ?.map((item) => OrderItem.fromJson(item))
               .toList() ??
           [],
+
       totalAmount: (json['totalAmount'] ?? 0).toDouble(),
+
+      // Backend trả về status (Pending/Processing...), giữ nguyên
       status: json['status'] ?? 'Pending',
+
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : DateTime.now(),
+
       notes: json['notes'] ?? '',
     );
   }
 
-  // Chuyển đổi thành JSON (để lưu vào Firestore)
+  // Chuyển đổi thành JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,

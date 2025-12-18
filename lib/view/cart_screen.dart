@@ -209,7 +209,7 @@ class CartScreen extends StatelessWidget {
                       )),
                   ElevatedButton.icon(
                     // Nếu chưa có CheckoutScreen thì tạm comment dòng này lại
-                    onPressed: () => Get.to(() => const CheckoutScreen()),
+                    onPressed: () => {}, //Get.to(() => const CheckoutScreen()),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
                       padding: const EdgeInsets.symmetric(

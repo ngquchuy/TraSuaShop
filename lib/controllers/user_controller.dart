@@ -5,17 +5,19 @@ class UserController extends GetxController {
   var userName = "Khách hàng".obs;
   var userEmail = "".obs;
   var fullName = "".obs;
-  // Mặc định dùng ảnh trong assets, nếu có link từ server sẽ thay thế
+  var token = ''.obs;
+  var userPhone = "".obs;
+  var role = "customer".obs;
   var avatarPath = "assets/images/avatar-with-black-hair-and-hoodie.png".obs;
 
   void setUserData(Map<String, dynamic> data) {
     userId.value = data['_id'] ?? "";
-    // Backend của bạn trả về cả 'username' và 'FullName', bạn chọn cái nào muốn hiển thị chính
     userName.value = data['FullName'] ?? data['username'] ?? "Người dùng";
     userEmail.value = data['email'] ?? "";
     fullName.value = data['FullName'] ?? "";
-
-    // Xử lý Avatar: Nếu server trả về link ảnh thì dùng, không thì giữ nguyên mặc định
+    token.value = data['token'] ?? "";
+    userPhone.value = data['phone'] ?? "";
+    role.value = data['role'] ?? "customer";
     if (data['avatar'] != null && data['avatar'].toString().isNotEmpty) {
       avatarPath.value = data['avatar'];
     }
@@ -26,6 +28,9 @@ class UserController extends GetxController {
     userId.value = "";
     userName.value = "Khách hàng";
     userEmail.value = "";
+    token.value = '';
+    userPhone.value = "";
+    role.value = "customer";
     avatarPath.value = "assets/images/avatar-with-black-hair-and-hoodie.png";
   }
 }

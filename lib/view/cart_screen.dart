@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:milktea_shop/controllers/shopping_controller.dart';
+import 'package:milktea_shop/models/user_model.dart';
 import 'package:milktea_shop/utils/number_formatter.dart';
-// Đảm bảo bạn đã có file checkout_screen.dart, nếu chưa thì tạm comment dòng này
-import 'package:milktea_shop/features/checkout/screens/checkout_screen.dart';
+import 'package:milktea_shop/view/checkout_screen.dart';
 
 class CartScreen extends StatelessWidget {
   final ShoppingController shoppingController = Get.find<ShoppingController>();
@@ -209,7 +209,7 @@ class CartScreen extends StatelessWidget {
                       )),
                   ElevatedButton.icon(
                     // Nếu chưa có CheckoutScreen thì tạm comment dòng này lại
-                    onPressed: () => {}, //Get.to(() => const CheckoutScreen()),
+                    onPressed: () => Get.to(() => const CheckoutScreen()),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
                       padding: const EdgeInsets.symmetric(

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:milktea_shop/controllers/user_controller.dart';
 import '../../models/product.dart';
 import '../../models/user_model.dart';
 import '../../services/product_service.dart';
 
 class AdminEditProductScreen extends StatefulWidget {
-  final User user;
   final Product? product;
 
-  const AdminEditProductScreen({Key? key, required this.user, this.product})
-      : super(key: key);
+  const AdminEditProductScreen({Key? key, this.product}) : super(key: key);
 
   @override
   State<AdminEditProductScreen> createState() => _AdminEditProductScreenState();
@@ -16,6 +16,7 @@ class AdminEditProductScreen extends StatefulWidget {
 
 class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
   final _formKey = GlobalKey<FormState>();
+  final UserController userController = Get.find<UserController>();
 
   // Controllers cho thông tin cơ bản
   final _nameController = TextEditingController();
@@ -125,14 +126,14 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
 
     final productService = ProductService();
     bool success;
+    final token = userController.token.value;
 
     try {
       if (widget.product == null) {
-        success = await productService.addProduct(
-            newProduct, widget.user.token ?? '');
+        success = await productService.addProduct(newProduct, token);
       } else {
         success = await productService.updateProduct(
-            widget.product!.id, newProduct, widget.user.token ?? '');
+            widget.product!.id, newProduct, token);
       }
 
       if (success && mounted) {
@@ -140,7 +141,7 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text("Lưu thành công!")));
       } else {
-        throw Exception("Server trả về lỗi");
+        throw Exception("Lỗi server");
       }
     } catch (e) {
       if (mounted)

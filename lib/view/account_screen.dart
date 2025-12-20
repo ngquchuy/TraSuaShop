@@ -9,6 +9,7 @@ import 'package:milktea_shop/features/shipping%20address/shipping_address_screen
 import 'package:milktea_shop/view/main_screen.dart';
 import 'package:milktea_shop/view/shopping_screen.dart';
 import 'package:milktea_shop/view/wish_list_screen.dart';
+import 'package:milktea_shop/features/order_history/screen/order_history_screen.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -107,6 +108,15 @@ class AccountScreen extends StatelessWidget {
                       title: 'Đơn hàng của tôi',
                       subtitle: 'Theo dõi trạng thái đơn hàng',
                       onTap: () => Get.to(() => ShoppingScreen()),
+                    ),
+                    _buildDivider(),
+                    _buildAccountItem(
+                      context,
+                      icon: Icons.history,
+                      title: 'Lịch sử đơn hàng',
+                      subtitle: 'Theo dõi trạng thái đơn hàng',
+                      onTap: () => Get.to(() =>
+                          const OrderHistoryScreen()),
                     ),
                     _buildDivider(),
                     _buildAccountItem(

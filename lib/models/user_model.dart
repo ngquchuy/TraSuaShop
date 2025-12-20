@@ -4,7 +4,8 @@ class User {
   final String fullName;
   final String email;
   final String role;
-  final String? token; // Token để dùng cho các request sau này
+  final String? token;
+  final String phone;
 
   User({
     required this.id,
@@ -13,26 +14,19 @@ class User {
     required this.email,
     required this.role,
     this.token,
+    this.phone = '',
   });
 
   // Factory để chuyển đổi từ JSON (Server trả về) sang Object Dart
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      // Lưu ý: Backend MongoDB trả về '_id', ta map sang 'id'
-      id: json['_id'] ?? '', 
-      
+      id: json['_id'] ?? '',
       username: json['username'] ?? '',
-      
-      // Backend trả về 'FullName' (viết hoa chữ F), map đúng tên key
-      fullName: json['FullName'] ?? '', 
-      
+      fullName: json['FullName'] ?? '',
       email: json['email'] ?? '',
-      
-      // Quan trọng: Đây là biến quyết định quyền
-      role: json['role'] ?? 'customer', 
-      
-      // Token xác thực
-      token: json['token'], 
+      role: json['role'] ?? 'customer',
+      token: json['token'],
+      phone: json['phone'] ?? '',
     );
   }
 
@@ -45,6 +39,7 @@ class User {
       'email': email,
       'role': role,
       'token': token,
+      'phone': phone,
     };
   }
 

@@ -1,44 +1,44 @@
-// import 'package:get/get.dart';
-// import 'package:firebase_database/firebase_database.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
-// class NotificationController extends GetxController {
-//   final notifications = <String>[].obs;
+class NotificationController extends GetxController {
+  final notifications = <String>[].obs;
+  final box = GetStorage(); // Khởi tạo instance của GetStorage
 
-//   final dbRef = FirebaseDatabase.instance.ref('notifications');
+  @override
+  void onInit() {
+    super.onInit();
 
-//   @override
-//   void onInit() {
-//     super.onInit();
+    // 1. LOAD: Đọc dữ liệu đã lưu khi khởi tạo controller
+    List? storedData = box.read<List>('notifications');
+    if (storedData != null) {
+      // Ép kiểu về List<String> và gán vào biến obs
+      notifications.assignAll(storedData.cast<String>());
+    }
 
-//     // Listen realtime
-//     dbRef.onValue.listen((event) {
-//       final data = event.snapshot.value;
-//       if (data == null) {
-//         notifications.clear();
-//       } else {
-//         final list = List<String>.from(data as List);
-//         notifications.assignAll(list);
-//       }
-//     });
-//   }
+    // 2. AUTO-SAVE: Lắng nghe mọi thay đổi của list 'notifications'
+    // Bất cứ khi nào add, remove, hay clear, hàm này sẽ chạy để lưu lại.
+    ever(notifications, (_) {
+      box.write('notifications', notifications.toList());
+    });
+  }
 
-//   // add
-//   Future<void> addNotification(String message) async {
-//     notifications.add(message);
-//     await dbRef.set(notifications); // update toàn bộ list lên firebase
-//   }
+  // Thêm thông báo (ever sẽ tự động lưu sau khi add)
+  void addNotification(String message) {
+    notifications.add(message);
+  }
 
-//   // remove 1 cái
-//   Future<void> removeNotification(int index) async {
-//     notifications.removeAt(index);
-//     await dbRef.set(notifications);
-//   }
+  // Xóa 1 thông báo (ever sẽ tự động lưu sau khi remove)
+  void removeNotification(int index) {
+    if (index >= 0 && index < notifications.length) {
+      notifications.removeAt(index);
+    }
+  }
 
-//   // clear hết
-//   Future<void> clearAll() async {
-//     notifications.clear();
-//     await dbRef.set([]);
-//   }
+  // Xóa hết (ever sẽ tự động lưu sau khi clear)
+  void clearAll() {
+    notifications.clear();
+  }
 
-//   int get count => notifications.length;
-// }
+  int get count => notifications.length;
+}

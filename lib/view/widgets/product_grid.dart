@@ -150,8 +150,7 @@ class ProductGrid extends StatelessWidget {
                     right: 8,
                     child: GestureDetector(
                       onTap: () {
-                        // Gọi hàm toggleFavorite trong Controller để đổi màu tim
-                        controller.toggleFavorite(product.id);
+                        //controller.toggleFavorite(product.id);
                       },
                       child: Container(
                         padding: const EdgeInsets.all(6),

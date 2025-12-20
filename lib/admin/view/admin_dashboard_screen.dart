@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:milktea_shop/controllers/user_controller.dart';
 import '../../models/order_model.dart';
 import '../../models/user_model.dart';
 import '../../services/order_service.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
-  final User user;
-  const AdminDashboardScreen({Key? key, required this.user}) : super(key: key);
+  const AdminDashboardScreen({Key? key}) : super(key: key);
 
   @override
   State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
@@ -14,6 +15,7 @@ class AdminDashboardScreen extends StatefulWidget {
 
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   final OrderService _orderService = OrderService();
+  final UserController userController = Get.find<UserController>();
   bool _isLoading = true;
 
   // Các biến thống kê
@@ -32,10 +34,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   Future<void> _loadStats() async {
     try {
-      // 1. Lấy toàn bộ đơn hàng
-      final orders = await _orderService.fetchOrders(widget.user.token ?? '');
+      final token = userController.token.value;
+      if (token.isEmpty) throw Exception("Token không tồn tại");
+      final orders = await _orderService.fetchOrders(token);
 
-      // 2. Tính toán số liệu
+      // Tính toán số liệu
       double revenue = 0;
       int countToday = 0;
       int pending = 0;

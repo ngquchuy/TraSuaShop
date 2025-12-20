@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:milktea_shop/controllers/user_controller.dart';
 import '../../models/order_model.dart';
-import '../../models/user_model.dart';
 import '../../services/order_service.dart';
 
 class AdminOrderScreen extends StatefulWidget {
-  final User user;
-  const AdminOrderScreen({Key? key, required this.user}) : super(key: key);
+  const AdminOrderScreen({Key? key}) : super(key: key);
 
   @override
   State<AdminOrderScreen> createState() => _AdminOrderScreenState();
@@ -14,6 +14,7 @@ class AdminOrderScreen extends StatefulWidget {
 
 class _AdminOrderScreenState extends State<AdminOrderScreen> {
   final OrderService _orderService = OrderService();
+  final UserController userController = Get.find<UserController>();
   List<OrderModel> _orders = [];
   bool _isLoading = true;
 
@@ -28,20 +29,24 @@ class _AdminOrderScreenState extends State<AdminOrderScreen> {
 
   Future<void> _loadOrders() async {
     try {
-      final orders = await _orderService.fetchOrders(widget.user.token ?? '');
-      setState(() {
-        _orders = orders;
-        _isLoading = false;
-      });
+      final orders =
+          await _orderService.fetchOrders(userController.token.value);
+      if (mounted) {
+        setState(() {
+          _orders = orders;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       print("Lỗi tải đơn: $e");
-      setState(() => _isLoading = false);
+      if (context.mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _updateStatus(String orderId, String newStatus) async {
     bool success = await _orderService.updateOrderStatus(
-        orderId, newStatus, widget.user.token ?? '');
+        orderId, newStatus, userController.token.value);
+    if (!mounted) return;
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Đã chuyển trạng thái: $newStatus")));

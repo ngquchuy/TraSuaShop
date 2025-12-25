@@ -13,7 +13,7 @@ class AuthService {
   static const String baseUrl = 'http://10.0.2.2:5001/api/auth';
 
   final _storage = const FlutterSecureStorage();
-  
+
   // Hàm lưu token (Dùng khi Login/Register thành công)
   Future<void> saveToken(String token) async {
     await _storage.write(key: 'jwt_token', value: token);
@@ -104,17 +104,15 @@ class AuthService {
   }
 
   // Gửi mật khẩu mới kèm OTP
-  Future<bool> resetPassword(String email, String otp, String newPassword) async {
+  Future<bool> resetPassword(
+      String email, String otp, String newPassword) async {
     final url = Uri.parse('$baseUrl/reset-password');
     try {
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': email,
-          'otp': otp,
-          'newPassword': newPassword
-        }),
+        body: jsonEncode(
+            {'email': email, 'otp': otp, 'newPassword': newPassword}),
       );
       return response.statusCode == 200;
     } catch (e) {

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../models/user_model.dart';
-import 'admin_order_screen.dart';
-import 'admin_menu_screen.dart';
-import 'admin_dashboard_screen.dart';
-import 'admin_settings_screen.dart';
+import 'package:get/get.dart';
+import 'package:firebase_messaging/firebase_messaging.dart'; // Import Firebase
+import 'package:milktea_shop/admin/view/admin_dashboard_screen.dart';
+import 'package:milktea_shop/admin/view/admin_menu_screen.dart';
+import 'package:milktea_shop/admin/view/admin_order_screen.dart';
+import 'package:milktea_shop/admin/view/admin_settings_screen.dart';
 
 class AdminMainScreen extends StatefulWidget {
-  final User user;
-
-  const AdminMainScreen({super.key, required this.user});
+  const AdminMainScreen({super.key});
 
   @override
   State<AdminMainScreen> createState() => _AdminMainScreenState();
@@ -17,20 +16,72 @@ class AdminMainScreen extends StatefulWidget {
 class _AdminMainScreenState extends State<AdminMainScreen> {
   int _currentIndex = 0;
 
+  // Danh sách các màn hình
+  final List<Widget> _screens = [
+    const AdminDashboardScreen(),
+    const AdminOrderScreen(),
+    const AdminMenuScreen(),
+    const AdminSettingsScreen(),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _setupPushNotification();
+  }
+
+  // --- HÀM CẤU HÌNH THÔNG BÁO ---
+  void _setupPushNotification() async {
+    // 1. Xin quyền thông báo (cho iOS/Android 13+)
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print('🔔 Admin đã cấp quyền thông báo');
+
+      // 2. QUAN TRỌNG NHẤT: Đăng ký vào Topic "admin_notifications"
+      // Phải trùng khớp 100% với chữ bên Backend Node.js
+      await messaging.subscribeToTopic('admin_notifications');
+      print('✅ Đã đăng ký nhận tin từ topic: admin_notifications');
+    } else {
+      print('🚫 Admin từ chối quyền thông báo');
+    }
+
+    // 3. Xử lý khi đang mở App mà có thông báo (Foreground)
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('📩 Nhận tin nhắn mới: ${message.notification?.title}');
+
+      // Hiện Snackbar báo ngay lập tức
+      if (message.notification != null) {
+        Get.snackbar(
+          message.notification!.title ?? 'Đơn hàng mới',
+          message.notification!.body ?? 'Kiểm tra ngay',
+          icon: const Icon(Icons.notifications_active, color: Colors.white),
+          backgroundColor: Colors.redAccent,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 6),
+          isDismissible: true,
+          margin: const EdgeInsets.all(10),
+          snackPosition: SnackPosition.TOP,
+          onTap: (_) {
+            // Khi bấm vào thông báo -> Chuyển sang tab Đơn hàng (Index 1)
+            setState(() {
+              _currentIndex = 1;
+            });
+          },
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Khai báo danh sách màn hình ngay trong build để truy cập được widget.user
-    final List<Widget> screens = [
-      AdminDashboardScreen(user: widget.user), // Tab 0
-
-      AdminOrderScreen(user: widget.user),
-
-      AdminMenuScreen(user: widget.user), // Tab 2
-      AdminSettingsScreen(user: widget.user), // Tab 3
-    ];
-
     return Scaffold(
-      body: screens[_currentIndex], // Hiển thị màn hình tương ứng
+      body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
@@ -39,12 +90,21 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard), label: 'Thống kê'),
+            icon: Icon(Icons.dashboard),
+            label: 'Tổng quan',
+          ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.list_alt), label: 'Đơn hàng'),
+            icon: Icon(Icons.list_alt),
+            label: 'Đơn hàng',
+          ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.restaurant_menu), label: 'Menu'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Cài đặt'),
+            icon: Icon(Icons.restaurant_menu),
+            label: 'Menu',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Cài đặt',
+          ),
         ],
       ),
     );

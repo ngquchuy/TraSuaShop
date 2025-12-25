@@ -4,9 +4,7 @@ import 'package:milktea_shop/controllers/theme_controller.dart';
 import 'package:milktea_shop/controllers/user_controller.dart';
 import 'package:milktea_shop/services/auth_service.dart';
 import 'package:milktea_shop/view/signin_screen.dart';
-import 'package:milktea_shop/features/help%20center/views/screen/help_center_screen.dart';
 import 'package:milktea_shop/features/shipping%20address/shipping_address_screen.dart';
-import 'package:milktea_shop/view/main_screen.dart';
 import 'package:milktea_shop/view/shopping_screen.dart';
 import 'package:milktea_shop/view/wish_list_screen.dart';
 

@@ -57,7 +57,7 @@ class SigninScreen extends StatelessWidget {
         User loggedInUser = User.fromJson(result);
 
         // Chuyển sang trang Dashboard và truyền user vào
-        Get.offAll(() => MainScreen(user: loggedInUser));
+        Get.offAll(() => const MainScreen());
       } else {
         logger.w("Đăng nhập thất bại");
 

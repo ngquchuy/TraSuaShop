@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import '../../models/order_model.dart';
-import '../../models/user_model.dart';
 import '../../services/order_service.dart';
+import '../../controllers/user_controller.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
-  final User user;
-  const AdminDashboardScreen({Key? key, required this.user}) : super(key: key);
+  const AdminDashboardScreen({super.key});
 
   @override
   State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
 }
 
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  final UserController userController = Get.find<UserController>();
   final OrderService _orderService = OrderService();
   bool _isLoading = true;
 
@@ -33,7 +33,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Future<void> _loadStats() async {
     try {
       // 1. Lấy toàn bộ đơn hàng
-      final orders = await _orderService.fetchOrders(widget.user.token ?? '');
+      final orders = await _orderService.fetchOrders(userController.token.value);
 
       // 2. Tính toán số liệu
       double revenue = 0;

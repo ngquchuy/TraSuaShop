@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart';
 import 'package:milktea_shop/utils/app_textstyles.dart';
 
 class QuestionCard extends StatelessWidget {

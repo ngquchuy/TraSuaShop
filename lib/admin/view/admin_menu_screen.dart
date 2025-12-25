@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../models/product.dart'; // Đảm bảo import đúng file model
-import '../../models/user_model.dart';
 import '../../services/product_service.dart';
 import 'admin_edit_product_screen.dart';
+import '../../controllers/user_controller.dart';
 
 class AdminMenuScreen extends StatefulWidget {
-  final User user;
-  const AdminMenuScreen({Key? key, required this.user}) : super(key: key);
+  const AdminMenuScreen({super.key});
 
   @override
   State<AdminMenuScreen> createState() => _AdminMenuScreenState();
 }
 
 class _AdminMenuScreenState extends State<AdminMenuScreen> {
+  final UserController userController = Get.find<UserController>();
   final ProductService _productService = ProductService();
   List<Product> _products = [];
   bool _isLoading = true;
@@ -66,18 +67,16 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
         false;
 
     if (confirm) {
-      await _productService.deleteProduct(id, widget.user.token ?? '');
+      await _productService.deleteProduct(id, userController.token.value);
       _loadProducts();
     }
   }
 
   void _openEditScreen([Product? product]) async {
     final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (_) =>
-              AdminEditProductScreen(user: widget.user, product: product)),
-    );
+        context,
+        MaterialPageRoute(
+            builder: (_) => AdminEditProductScreen(product: product)));
 
     if (result == true) {
       _loadProducts();

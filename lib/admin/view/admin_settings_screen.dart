@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../models/user_model.dart';
+import 'package:get/get.dart'; // Import GetX
+import '../../controllers/user_controller.dart'; // Import Controller
 import '../../view/signin_screen.dart';
 
 class AdminSettingsScreen extends StatelessWidget {
-  final User user;
-
-  const AdminSettingsScreen({Key? key, required this.user}) : super(key: key);
+  // 1. SỬA LỖI TÊN CONSTRUCTOR (Phải trùng tên Class)
+  const AdminSettingsScreen({super.key});
 
   void _handleLogout(BuildContext context) {
-    // Show dialog xác nhận
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -23,12 +22,12 @@ class AdminSettingsScreen extends StatelessWidget {
             onPressed: () {
               Navigator.pop(ctx); // Đóng dialog
 
-              // Điều hướng về màn hình Login và xóa hết lịch sử back
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => SigninScreen()),
-                (route) => false,
-              );
+              // 2. GỌI CONTROLLER ĐỂ XÓA DATA & HỦY FIREBASE
+              final UserController userController = Get.find<UserController>();
+              userController.clearData();
+
+              // 3. Dùng Get.offAll để xóa sạch lịch sử và về trang Login
+              Get.offAll(() => SigninScreen());
             },
             child: const Text("Đăng xuất", style: TextStyle(color: Colors.red)),
           ),
@@ -39,6 +38,9 @@ class AdminSettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 4. LẤY DATA TỪ CONTROLLER
+    final UserController userController = Get.find<UserController>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Cài đặt tài khoản"),
@@ -58,8 +60,9 @@ class AdminSettingsScreen extends StatelessWidget {
                     radius: 50,
                     backgroundColor: Colors.redAccent.withOpacity(0.2),
                     child: Text(
-                      user.fullName.isNotEmpty
-                          ? user.fullName[0].toUpperCase()
+                      // Sửa user.fullName -> userController.userName.value
+                      userController.userName.value.isNotEmpty
+                          ? userController.userName.value[0].toUpperCase()
                           : "A",
                       style: const TextStyle(
                           fontSize: 40,
@@ -68,15 +71,20 @@ class AdminSettingsScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
+
+                  // Hiển thị tên
                   Text(
-                    user.fullName,
+                    userController.userName.value, // Lấy từ Controller
                     style: const TextStyle(
                         fontSize: 22, fontWeight: FontWeight.bold),
                   ),
+
+                  // Hiển thị Email
                   Text(
-                    user.email,
+                    userController.userEmail.value, // Lấy từ Controller
                     style: const TextStyle(color: Colors.grey),
                   ),
+
                   const SizedBox(height: 5),
                   Container(
                     padding:
@@ -87,7 +95,8 @@ class AdminSettingsScreen extends StatelessWidget {
                       border: Border.all(color: Colors.blue.withOpacity(0.3)),
                     ),
                     child: Text(
-                      user.role.toUpperCase(),
+                      userController.role.value
+                          .toUpperCase(), // Lấy từ Controller
                       style: const TextStyle(
                           color: Colors.blue,
                           fontSize: 12,
@@ -127,9 +136,6 @@ class AdminSettingsScreen extends StatelessWidget {
                 child: const Text("Đăng xuất"),
               ),
             ),
-            // const SizedBox(height: 20),
-            // const Text("Version 1.0.0",
-            //     style: TextStyle(color: Colors.grey, fontSize: 12)),
           ],
         ),
       ),

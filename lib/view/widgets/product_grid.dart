@@ -48,6 +48,8 @@ class ProductGrid extends StatelessWidget {
       // 3. Hiển thị lưới sản phẩm
       return GridView.builder(
         padding: const EdgeInsets.all(16),
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           childAspectRatio:

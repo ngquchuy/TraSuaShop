@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:milktea_shop/controllers/user_controller.dart';
 import '../../models/product.dart';
-import '../../models/user_model.dart';
 import '../../services/product_service.dart';
 
 class AdminEditProductScreen extends StatefulWidget {
-  final User user;
   final Product? product;
 
-  const AdminEditProductScreen({Key? key, required this.user, this.product})
-      : super(key: key);
+  const AdminEditProductScreen({Key? key, this.product}) : super(key: key);
 
   @override
   State<AdminEditProductScreen> createState() => _AdminEditProductScreenState();
 }
 
 class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
+  final UserController userController = Get.find<UserController>();
   final _formKey = GlobalKey<FormState>();
 
   // Controllers cho thông tin cơ bản
@@ -126,13 +126,14 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
     final productService = ProductService();
     bool success;
 
+    final token = userController.token.value;
+
     try {
       if (widget.product == null) {
-        success = await productService.addProduct(
-            newProduct, widget.user.token ?? '');
+        success = await productService.addProduct(newProduct, token);
       } else {
         success = await productService.updateProduct(
-            widget.product!.id, newProduct, widget.user.token ?? '');
+            widget.product!.id, newProduct, token);
       }
 
       if (success && mounted) {
